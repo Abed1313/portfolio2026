@@ -1,0 +1,46 @@
+---
+import type { Locale, Project } from '../../data/types';
+import { tr, useUi } from '../../lib/i18n';
+import { badgeTone, statusBadge } from '../../lib/projects';
+
+interface Props {
+  project: Project;
+  locale: Locale;
+  showFeatured?: boolean;
+}
+const { project, locale, showFeatured = false } = Astro.props;
+const ui = useUi(locale);
+const status = statusBadge(project, locale);
+const badges = project.badges ?? [];
+---
+{(showFeatured || status || badges.length > 0) && (
+  <ul class="flex flex-wrap items-center gap-2">
+    {showFeatured && (
+      <li class={`badge ${badgeTone.accent}`}>★ {ui.projects.featured}</li>
+    )}
+    {status && (
+      <li class={`badge ${badgeTone[status.tone ?? 'neutral']}`}>
+        <span class:list={['status-dot', status.tone === 'warning' && 'bg-warning!']} aria-hidden="true"></span>
+        {tr(status.label, locale)}
+      </li>
+    )}
+    {badges.map((b) => (
+      <li class={`badge ${badgeTone[b.tone ?? 'neutral']}`}>{tr(b.label, locale)}</li>
+    ))}
+  </ul>
+)}
+
+<style>
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 999px;
+    border-width: 1px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+</style>

@@ -98,7 +98,10 @@ export const en = {
     type: 'Type',
     date: 'Date',
     gallery: 'Screenshots',
+    screenshot: 'screenshot',
+    coverAlt: 'preview',
     noResults: 'No projects match this filter.',
+    tabsLabel: 'Project categories',
     status: {
       'in-progress': 'In Testing',
       live: 'Live',
@@ -111,6 +114,7 @@ export const en = {
     training: 'Training & courses',
     filterAll: 'All',
     categories: 'Filter by category',
+    imageAlt: 'certificate',
   },
   contact: {
     intro:

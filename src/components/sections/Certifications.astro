@@ -1,0 +1,126 @@
+---
+/**
+ * Official certifications (featured "badge" cards) on top,
+ * then training & courses in a grid with category filter chips.
+ */
+import { Icon } from 'astro-icon/components';
+import type { Certification, Locale } from '../../data/types';
+import { certifications, certificationCategories } from '../../data/certifications';
+import { tr, useUi } from '../../lib/i18n';
+import { isFilled } from '../../lib/links';
+import SectionHeader from '../ui/SectionHeader.astro';
+import OrgLogo from '../ui/OrgLogo.astro';
+import CertActions from '../certs/CertActions.astro';
+import CertLightbox from '../certs/CertLightbox.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const ui = useUi(locale);
+
+const official = certifications.filter((c) => c.type === 'certification');
+const training = certifications.filter((c) => c.type === 'training');
+const usedCategories = certificationCategories.filter((cat) => training.some((t) => t.category === cat.id));
+const categoryLabel = (c: Certification) => tr(certificationCategories.find((x) => x.id === c.category)?.label, locale);
+/** "[ISSUER]" placeholders are hidden; the monogram falls back to the title. */
+const issuerOf = (c: Certification) => (isFilled(tr(c.issuer, locale)) ? tr(c.issuer, locale) : '');
+---
+<section id="certifications" class="section" aria-labelledby="certifications-title" data-certs>
+  <div class="container-page">
+    <SectionHeader id="certifications" locale={locale} />
+
+    <!-- official -->
+    <h3 class="reveal mb-4 flex items-center gap-2 font-mono text-sm font-medium text-accent">
+      <Icon name="lucide:shield-check" class="size-4" aria-hidden="true" />{ui.certifications.official}
+    </h3>
+    <div class="mb-14 grid gap-5 md:grid-cols-2">
+      {official.map((c, i) => (
+        <article class="reveal card card-hover official relative flex flex-col overflow-hidden p-6 sm:p-7" style={`--i:${i}`}>
+          <div class="flex items-start gap-4">
+            <OrgLogo id={c.issuerLogoId} name={issuerOf(c) || tr(c.title, 'en')} size="lg" />
+            <div class="min-w-0 flex-1">
+              <p class="inline-flex items-center gap-1.5 rounded-full border border-success/35 bg-success/10 px-2.5 py-0.5 text-xs font-semibold text-success">
+                <Icon name="lucide:badge-check" class="size-3.5" aria-hidden="true" />
+                {ui.certifications.verified}
+              </p>
+              <h4 class="text-h3 mt-3 font-semibold text-fg">{tr(c.title, locale)}</h4>
+              <p class="mt-1.5 text-sm text-muted">
+                {issuerOf(c) && <span class="font-medium text-fg/90">{issuerOf(c)}</span>}
+                {issuerOf(c) && <span aria-hidden="true"> · </span>}
+                <span class="font-mono">{tr(c.date, locale)}</span>
+              </p>
+            </div>
+          </div>
+          <CertActions cert={c} locale={locale} />
+          <Icon name="lucide:award" class="official-watermark" aria-hidden="true" />
+        </article>
+      ))}
+    </div>
+
+    <!-- training -->
+    <h3 class="reveal mb-4 flex items-center gap-2 font-mono text-sm font-medium text-accent">
+      <Icon name="lucide:book-open" class="size-4" aria-hidden="true" />{ui.certifications.training}
+    </h3>
+
+    {usedCategories.length > 1 && (
+      <div class="reveal chip-row mb-6" role="group" aria-label={ui.certifications.categories}>
+        <button type="button" class="filter-chip" aria-pressed="true" data-cert-filter="">
+          {ui.certifications.filterAll} <span class="opacity-70">{training.length}</span>
+        </button>
+        {usedCategories.map((cat) => (
+          <button type="button" class="filter-chip" aria-pressed="false" data-cert-filter={cat.id}>
+            {tr(cat.label, locale)} <span class="opacity-70">{training.filter((t) => t.category === cat.id).length}</span>
+          </button>
+        ))}
+      </div>
+    )}
+
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {training.map((c, i) => (
+        <article class="reveal card card-hover flex flex-col p-5" style={`--i:${i % 3}`} data-cert-card data-category={c.category}>
+          <div class="flex items-start gap-3">
+            <OrgLogo id={c.issuerLogoId} name={issuerOf(c) || tr(c.title, 'en')} size="sm" />
+            <div class="min-w-0 flex-1">
+              <h4 class="font-semibold leading-snug text-fg">{tr(c.title, locale)}</h4>
+              {c.note && <p class="mt-1 text-xs text-muted">{tr(c.note, locale)}</p>}
+            </div>
+          </div>
+          <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted">
+            {issuerOf(c) && <span>{issuerOf(c)}</span>}
+            <span class="font-mono text-xs">{tr(c.date, locale)}</span>
+            <span class="chip ms-auto">{categoryLabel(c)}</span>
+          </div>
+          <CertActions cert={c} locale={locale} />
+        </article>
+      ))}
+    </div>
+  </div>
+
+  {certifications.map((c) => <CertLightbox cert={c} locale={locale} />)}
+</section>
+
+<script>
+  import '../../scripts/certs';
+  import '../../scripts/dialogs';
+</script>
+
+<style>
+  .official {
+    border-color: color-mix(in oklab, var(--accent) 30%, var(--border));
+    background:
+      radial-gradient(90% 120% at 0% 0%, color-mix(in oklab, var(--accent) 9%, transparent), transparent 55%),
+      radial-gradient(70% 100% at 100% 100%, color-mix(in oklab, var(--violet) 8%, transparent), transparent 60%),
+      color-mix(in oklab, var(--surface) 88%, transparent);
+  }
+  .official-watermark {
+    position: absolute;
+    inset-inline-end: -1.25rem;
+    bottom: -1.25rem;
+    width: 8rem;
+    height: 8rem;
+    color: var(--accent);
+    opacity: 0.06;
+    pointer-events: none;
+  }
+</style>

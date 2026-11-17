@@ -1,0 +1,37 @@
+---
+/**
+ * Organisation / issuer logo from src/assets/images/logos/<id>.*
+ * Falls back to a monogram (or an icon) when the file is missing.
+ */
+import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
+import type { IconName } from '../../data/types';
+import { getLogo } from '../../lib/images';
+import Monogram from './Monogram.astro';
+
+interface Props {
+  id?: string;
+  /** Name used for the monogram fallback + alt text. */
+  name: string;
+  /** Used instead of a monogram when no logo and no meaningful name. */
+  fallbackIcon?: IconName;
+  size?: 'sm' | 'md' | 'lg';
+  class?: string;
+}
+
+const { id, name, fallbackIcon, size = 'md', class: className = '' } = Astro.props;
+const logo = getLogo(id);
+const box = { sm: 'size-9 text-xs', md: 'size-11 text-sm', lg: 'size-14 text-base' }[size];
+const px = { sm: 36, md: 44, lg: 56 }[size];
+---
+{logo ? (
+  <span class:list={['inline-grid shrink-0 place-items-center overflow-hidden rounded-xl border border-line bg-white p-1', box, className]}>
+    <Image src={logo} alt={`${name} logo`} width={px * 2} height={px * 2} class="h-full w-full object-contain" loading="lazy" />
+  </span>
+) : fallbackIcon ? (
+  <span class:list={['inline-grid shrink-0 place-items-center rounded-xl border border-line bg-surface-2 text-accent', box, className]} aria-hidden="true">
+    <Icon name={fallbackIcon} class="size-1/2" />
+  </span>
+) : (
+  <Monogram text={name} class:list={[box, className]} />
+)}

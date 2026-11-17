@@ -44,13 +44,20 @@ for (const theme of themes) {
     page.on('response', (r) => r.status() >= 400 && errors.push(`${r.status()} ${r.url()}`));
 
     await page.goto(base + path, { waitUntil: 'networkidle' });
+    if ((await page.evaluate(() => document.styleSheets.length)) === 0) errors.push('page has NO stylesheet (unstyled build)');
     // reveal everything that animates in on scroll
     await page.evaluate(() => document.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-visible')));
     await page.waitForTimeout(150);
 
-    const result = await page.evaluate(() => {
-      const vw = document.documentElement.clientWidth;
-      const overflow = document.documentElement.scrollWidth - vw;
+    const result = await page.evaluate((deviceWidth) => {
+      // Mobile emulation zooms out to fit wide content (innerWidth grows),
+      // so compare against the real device width, not clientWidth alone.
+      const vw = deviceWidth;
+      const overflow = Math.max(
+        document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        window.innerWidth - deviceWidth,
+        document.documentElement.scrollWidth - deviceWidth,
+      );
       const offenders = [];
       if (overflow > 0) {
         for (const el of document.querySelectorAll('body *')) {
@@ -77,7 +84,7 @@ for (const theme of themes) {
         if (r.width < 44 || r.height < 44) small.push(`${el.tagName.toLowerCase()} "${(el.getAttribute('aria-label') || el.textContent || '').trim().slice(0, 30)}" ${Math.round(r.width)}x${Math.round(r.height)}`);
       }
       return { overflow, offenders: offenders.slice(0, 10), small: [...new Set(small)].slice(0, 15) };
-    });
+    }, width);
 
     const file = `${outDir}/${path.replace(/\W+/g, '_') || 'home'}-${theme}-${width}.png`;
     await page.screenshot({ path: file, fullPage: true });

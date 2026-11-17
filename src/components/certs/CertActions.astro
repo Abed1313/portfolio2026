@@ -1,0 +1,47 @@
+---
+/**
+ * Certificate buttons. Each appears only when its source exists:
+ *   image  (src/assets/images/certificates/<id>.*) → View Certificate (lightbox)
+ *   PDF    (public/certificates/<id>.pdf)          → Open PDF
+ *   credentialUrl                                  → Verify
+ */
+import { Icon } from 'astro-icon/components';
+import type { Certification, Locale } from '../../data/types';
+import { tr, useUi } from '../../lib/i18n';
+import { isSet } from '../../lib/links';
+import { getCertificateImage, getCertificatePdf } from '../../lib/images';
+
+interface Props {
+  cert: Certification;
+  locale: Locale;
+}
+const { cert, locale } = Astro.props;
+const ui = useUi(locale);
+const title = tr(cert.title, locale);
+const image = getCertificateImage(cert.id);
+const pdf = getCertificatePdf(cert.id);
+const verify = isSet(cert.credentialUrl) ? cert.credentialUrl : undefined;
+const btn = 'btn btn-secondary min-h-11 px-3 text-sm';
+---
+{(image || pdf || verify) && (
+  <div class="mt-auto flex flex-wrap gap-2 pt-5">
+    {image && (
+      <button type="button" class={btn} data-dialog-open={`cert-${cert.id}`} aria-haspopup="dialog" aria-label={`${ui.actions.viewCertificate}: ${title}`}>
+        <Icon name="lucide:image" class="size-4" aria-hidden="true" />
+        {ui.actions.viewCertificate}
+      </button>
+    )}
+    {pdf && (
+      <a href={pdf} target="_blank" rel="noopener" class={btn} aria-label={`${ui.actions.openPdf}: ${title} ${ui.a11y.opensInNewTab}`}>
+        <Icon name="lucide:file-text" class="size-4" aria-hidden="true" />
+        {ui.actions.openPdf}
+      </a>
+    )}
+    {verify && (
+      <a href={verify} target="_blank" rel="noopener noreferrer" class={btn} aria-label={`${ui.actions.verify}: ${title} ${ui.a11y.opensInNewTab}`}>
+        <Icon name="lucide:badge-check" class="size-4" aria-hidden="true" />
+        {ui.actions.verify}
+      </a>
+    )}
+  </div>
+)}

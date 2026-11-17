@@ -1,0 +1,28 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { Locale } from '../../data/types';
+import { volunteering } from '../../data/volunteering';
+import { tr } from '../../lib/i18n';
+import SectionHeader from '../ui/SectionHeader.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+---
+<section id="volunteering" class="section" aria-labelledby="volunteering-title">
+  <div class="container-page">
+    <SectionHeader id="volunteering" locale={locale} />
+
+    <ul class="grid gap-4 md:grid-cols-2">
+      {volunteering.map((v, i) => (
+        <li class="reveal card card-hover flex items-start gap-4 p-5 sm:p-6" style={`--i:${i}`}>
+          <span class="grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-surface-2 text-violet">
+            <Icon name={v.icon} class="size-5" aria-hidden="true" />
+          </span>
+          <p class="text-fg/90">{tr(v.text, locale)}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

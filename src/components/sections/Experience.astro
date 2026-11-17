@@ -1,0 +1,128 @@
+---
+/** Experience as a `git log --graph`: branch line on the start side, one "commit" per role. */
+import type { Locale } from '../../data/types';
+import { experience } from '../../data/experience';
+import { tr, useUi } from '../../lib/i18n';
+import SectionHeader from '../ui/SectionHeader.astro';
+import OrgLogo from '../ui/OrgLogo.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const ui = useUi(locale);
+
+/** Decorative, deterministic 7-char "commit hash" from the item id (not data). */
+function shortHash(s: string): string {
+  let h = 2166136261;
+  for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  return (h >>> 0).toString(16).padStart(8, '0').slice(0, 7);
+}
+---
+<section id="experience" class="section" aria-labelledby="experience-title">
+  <div class="container-page">
+    <SectionHeader id="experience" locale={locale} />
+
+    <ol class="git-log relative">
+      {experience.map((job, i) => {
+        const company = tr(job.company, locale);
+        return (
+          <li class="reveal relative ps-10 pb-10 last:pb-0 sm:ps-14" style={`--i:${i}`}>
+            <!-- graph node -->
+            <span class:list={['commit-node', job.current && 'is-current']} aria-hidden="true"></span>
+
+            <article class="card card-hover p-5 sm:p-7">
+              <p class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs">
+                <bdi dir="ltr" class="text-warning">commit {shortHash(job.id)}</bdi>
+                {job.current && (
+                  <bdi dir="ltr" class="rounded-md border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-accent">
+                    HEAD → main
+                  </bdi>
+                )}
+              </p>
+
+              <header class="flex items-start gap-4">
+                <OrgLogo id={job.logoId} name={company} fallbackIcon={job.logoId ? undefined : 'lucide:pen-tool'} />
+                <div class="min-w-0 flex-1">
+                  <h3 class="text-h3 font-semibold text-fg">{tr(job.role, locale)}</h3>
+                  <p class="mt-1 text-muted">
+                    <span class="font-medium text-fg/90">{company}</span>
+                  </p>
+                </div>
+              </header>
+
+              <p class="mt-3 inline-flex items-center gap-2 font-mono text-sm text-muted">
+                <span>{tr(job.start, locale)}</span>
+                <span aria-hidden="true">→</span>
+                <span class:list={[job.current && 'font-semibold text-success']}>
+                  {job.current ? ui.experience.present : tr(job.end, locale)}
+                </span>
+              </p>
+
+              <ul class="mt-5 grid gap-3">
+                {job.bullets.map((b) => (
+                  <li class="flex gap-3 text-fg/90">
+                    <span class="mt-[0.7em] size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true"></span>
+                    <span class="prose-width">{tr(b, locale)}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {job.tags && job.tags.length > 0 && (
+                <ul class="mt-5 flex flex-wrap gap-2">
+                  {job.tags.map((t) => <li class="chip">{t}</li>)}
+                </ul>
+              )}
+            </article>
+          </li>
+        );
+      })}
+    </ol>
+  </div>
+</section>
+
+<style>
+  /* the branch line */
+  .git-log::before {
+    content: '';
+    position: absolute;
+    inset-block: 0.5rem 0.5rem;
+    inset-inline-start: 0.6875rem;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), color-mix(in oklab, var(--violet) 60%, transparent) 70%, transparent);
+    opacity: 0.7;
+  }
+  @media (min-width: 640px) {
+    .git-log::before {
+      inset-inline-start: 1.1875rem;
+    }
+  }
+
+  .commit-node {
+    position: absolute;
+    top: 1.6rem;
+    inset-inline-start: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 999px;
+    border: 2px solid var(--accent);
+    background: var(--bg);
+  }
+  @media (min-width: 640px) {
+    .commit-node {
+      inset-inline-start: 0.75rem;
+    }
+  }
+  .commit-node.is-current {
+    background: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 22%, transparent);
+    animation: node-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes node-pulse {
+    0%, 100% { box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 22%, transparent); }
+    50% { box-shadow: 0 0 0 9px color-mix(in oklab, var(--accent) 0%, transparent); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .commit-node.is-current { animation: none; }
+  }
+</style>

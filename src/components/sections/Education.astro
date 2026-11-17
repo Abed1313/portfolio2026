@@ -1,0 +1,49 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { Locale } from '../../data/types';
+import { education } from '../../data/education';
+import { tr } from '../../lib/i18n';
+import { isFilled } from '../../lib/links';
+import SectionHeader from '../ui/SectionHeader.astro';
+import OrgLogo from '../ui/OrgLogo.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+---
+<section id="education" class="section" aria-labelledby="education-title">
+  <div class="container-page">
+    <SectionHeader id="education" locale={locale} />
+
+    <div class="grid gap-5 md:grid-cols-2">
+      {education.map((e, i) => {
+        const institution = tr(e.institution, locale);
+        return (
+          <article class="reveal card card-hover flex gap-4 p-6" style={`--i:${i}`}>
+            <OrgLogo id={e.logoId} name={institution} />
+            <div class="min-w-0 flex-1">
+              <h3 class="text-h3 font-semibold text-fg">{tr(e.title, locale)}</h3>
+              <p class="mt-1 text-fg/90">{institution}</p>
+              <p class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
+                {e.location && (
+                  <span class="inline-flex items-center gap-1.5">
+                    <Icon name="lucide:map-pin" class="size-4" aria-hidden="true" />
+                    {tr(e.location, locale)}
+                  </span>
+                )}
+                {isFilled(e.year) && (
+                  <span class="inline-flex items-center gap-1.5 font-mono">
+                    <Icon name="lucide:calendar" class="size-4" aria-hidden="true" />
+                    {e.year}
+                  </span>
+                )}
+              </p>
+              {e.note && <p class="mt-3 text-sm text-muted">{tr(e.note, locale)}</p>}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</section>

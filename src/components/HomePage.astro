@@ -8,6 +8,11 @@ import ScrollChrome from './layout/ScrollChrome.astro';
 import Hero from './sections/Hero.astro';
 import About from './sections/About.astro';
 import Skills from './sections/Skills.astro';
+import Experience from './sections/Experience.astro';
+import Projects from './sections/Projects.astro';
+import Certifications from './sections/Certifications.astro';
+import Education from './sections/Education.astro';
+import Volunteering from './sections/Volunteering.astro';
 
 interface Props {
   locale: Locale;
@@ -21,7 +26,11 @@ const { locale } = Astro.props;
     <Hero locale={locale} />
     <About locale={locale} />
     <Skills locale={locale} />
-    {/* Phase 3: Experience, Projects, Certifications, Education, Volunteering */}
+    <Experience locale={locale} />
+    <Projects locale={locale} />
+    <Certifications locale={locale} />
+    <Education locale={locale} />
+    <Volunteering locale={locale} />
     {/* Phase 4: Contact */}
   </main>
   <Footer locale={locale} />

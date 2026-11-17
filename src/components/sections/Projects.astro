@@ -1,0 +1,114 @@
+---
+/**
+ * Projects: tabs "Full-Stack Development" (first) and "RPA Automation",
+ * plus technology filter chips for the full-stack tab.
+ * Without JS both panels are simply shown one after another.
+ */
+import type { Locale } from '../../data/types';
+import { projects, rpaProjects } from '../../data/projects';
+import { skillCategories } from '../../data/skills';
+import { tr, useUi } from '../../lib/i18n';
+import SectionHeader from '../ui/SectionHeader.astro';
+import ProjectCard from '../projects/ProjectCard.astro';
+import ProjectModal from '../projects/ProjectModal.astro';
+import RpaCard from '../projects/RpaCard.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const ui = useUi(locale);
+
+/* Featured first, then data order. */
+const ordered = [...projects].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
+
+/* Filter chips = project tags that are real technologies (i.e. also listed in skills.ts). */
+const techNames = new Set(skillCategories.flatMap((c) => c.skills.map((s) => tr(s.name, 'en').toLowerCase())));
+const techCounts = new Map<string, number>();
+for (const p of projects) for (const t of p.tags) if (techNames.has(t.toLowerCase())) techCounts.set(t, (techCounts.get(t) ?? 0) + 1);
+const filters = [...techCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+const tabs = [
+  { id: 'fullstack', label: ui.projects.tabFullStack, count: projects.length },
+  { id: 'rpa', label: ui.projects.tabRpa, count: rpaProjects.length },
+] as const;
+---
+<section id="projects" class="section" aria-labelledby="projects-title" data-projects>
+  <div class="container-page">
+    <SectionHeader id="projects" locale={locale} />
+
+    <!-- tabs -->
+    <div class="reveal mb-6 flex flex-wrap gap-2 rounded-2xl border border-line bg-surface/60 p-1.5 sm:inline-flex" role="tablist" aria-label={ui.projects.tabsLabel}>
+      {tabs.map((t, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`proj-tab-${t.id}`}
+          aria-controls={`proj-panel-${t.id}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          tabindex={i === 0 ? 0 : -1}
+          data-proj-tab={t.id}
+          class="proj-tab inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-muted transition-colors hover:text-fg sm:flex-none"
+        >
+          {t.label}
+          <span class="rounded-md bg-surface-2 px-1.5 font-mono text-xs">{t.count}</span>
+        </button>
+      ))}
+    </div>
+
+    <!-- full-stack panel -->
+    <div id="proj-panel-fullstack" role="tabpanel" aria-labelledby="proj-tab-fullstack" data-proj-panel="fullstack">
+      {filters.length > 1 && (
+        <div class="reveal chip-row mb-6" role="group" aria-label={ui.projects.filterLabel}>
+          <button type="button" class="filter-chip font-mono" aria-pressed="true" data-filter="">
+            {ui.projects.filterAll} <span class="opacity-70">{projects.length}</span>
+          </button>
+          {filters.map(([tag, count]) => (
+            <button type="button" class="filter-chip font-mono" aria-pressed="false" data-filter={tag.toLowerCase()}>
+              {tag} <span class="opacity-70">{count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {ordered.map((p, i) => (
+          <ProjectCard project={p} locale={locale} index={i} filterTags={p.tags.map((t) => t.toLowerCase())} />
+        ))}
+      </div>
+      <p class="mt-6 text-center text-muted" data-no-results hidden>{ui.projects.noResults}</p>
+      <p class="sr-only" aria-live="polite" data-filter-status></p>
+    </div>
+
+    <!-- RPA panel -->
+    <div id="proj-panel-rpa" role="tabpanel" aria-labelledby="proj-tab-rpa" data-proj-panel="rpa" data-inactive class="proj-panel-rpa">
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {rpaProjects.map((p, i) => <RpaCard project={p} locale={locale} index={i} />)}
+      </div>
+    </div>
+  </div>
+
+  {ordered.map((p) => <ProjectModal project={p} locale={locale} />)}
+</section>
+
+<script>
+  import '../../scripts/projects';
+  import '../../scripts/dialogs';
+</script>
+
+<style>
+  .proj-tab[aria-selected='true'] {
+    color: var(--on-accent);
+    background: linear-gradient(100deg, var(--grad-from), var(--grad-to));
+  }
+  .proj-tab[aria-selected='true'] span {
+    background: rgb(0 0 0 / 0.15);
+  }
+  /* no-JS: both panels visible (stacked). With JS: only the selected one. */
+  :global(.js) [data-proj-panel][data-inactive] {
+    display: none;
+  }
+  html:not(.js) .proj-panel-rpa {
+    margin-top: 3rem;
+  }
+</style>

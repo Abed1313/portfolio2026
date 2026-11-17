@@ -12,7 +12,8 @@
     "astro": "astro",
     "check": "astro check",
     "check:layout": "node tools/check-layout.mjs",
-    "check:ui": "node tools/check-interactions.mjs"
+    "check:ui": "node tools/check-interactions.mjs",
+    "postbuild": "node tools/verify-build.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.5",

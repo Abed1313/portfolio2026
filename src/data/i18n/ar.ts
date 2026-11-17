@@ -99,7 +99,10 @@ export const ar: UiStrings = {
     type: 'النوع',
     date: 'التاريخ',
     gallery: 'لقطات الشاشة',
+    screenshot: 'لقطة شاشة',
+    coverAlt: 'معاينة',
     noResults: 'لا توجد مشاريع مطابقة لهذا التصنيف.',
+    tabsLabel: 'فئات المشاريع',
     status: {
       'in-progress': 'قيد الاختبار',
       live: 'مُطلق',
@@ -112,6 +115,7 @@ export const ar: UiStrings = {
     training: 'التدريب والدورات',
     filterAll: 'الكل',
     categories: 'التصفية حسب الفئة',
+    imageAlt: 'شهادة',
   },
   contact: {
     intro: 'هل تبحث عن مرشّح لوظيفة في RPA أو الأتمتة أو البرمجيات؟ أرسل لي رسالة وسأردّ عليك.',

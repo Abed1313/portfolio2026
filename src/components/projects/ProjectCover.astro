@@ -1,0 +1,90 @@
+---
+/**
+ * 16:9 project cover.
+ * Uses src/assets/images/projects/<id>/cover.* when present; otherwise a
+ * gradient placeholder (title + tags) or a code/terminal placeholder for API/console projects.
+ * The aspect-ratio box is fixed, so adding an image later never causes layout shift.
+ */
+import { Image } from 'astro:assets';
+import type { Locale, Project } from '../../data/types';
+import { tr, useUi } from '../../lib/i18n';
+import { getProjectCover } from '../../lib/images';
+
+interface Props {
+  project: Project;
+  locale: Locale;
+  /** Larger image sizes for the featured card. */
+  featured?: boolean;
+  class?: string;
+}
+const { project, locale, featured = false, class: className = '' } = Astro.props;
+const ui = useUi(locale);
+const cover = getProjectCover(project.id);
+const title = tr(project.title, locale);
+
+/* deterministic hue shift per project so placeholders differ slightly */
+const hue = [...project.id].reduce((a, c) => a + c.charCodeAt(0), 0) % 60;
+---
+<div class:list={['cover relative aspect-video w-full overflow-hidden', className]}>
+  {cover ? (
+    <Image
+      src={cover}
+      alt={`${title}: ${ui.projects.coverAlt}`}
+      widths={featured ? [480, 800, 1200, 1600] : [400, 640, 960]}
+      sizes={featured ? '(min-width: 1024px) 600px, 100vw' : '(min-width: 1024px) 380px, (min-width: 768px) 50vw, 100vw'}
+      class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+      loading="lazy"
+      decoding="async"
+    />
+  ) : project.placeholder === 'code' ? (
+    <div class="ph-code absolute inset-0 flex flex-col justify-center gap-1.5 px-5 font-mono text-[0.78rem] leading-relaxed sm:px-6" dir="ltr" aria-hidden="true">
+      <span><span class="text-success">$</span> <span class="text-fg">cd</span> <span class="text-syn-str">{project.id}</span></span>
+      <span><span class="text-success">$</span> <span class="text-fg">cat</span> <span class="text-syn-str">stack.txt</span></span>
+      <span class="line-clamp-2 text-syn-prop">{project.tags.join('  ·  ')}</span>
+      <span><span class="text-success">$</span> <span class="caret-sm"></span></span>
+    </div>
+  ) : (
+    <div class="ph-gradient absolute inset-0 grid place-items-center p-6 text-center" style={`--h:${hue}`} aria-hidden="true">
+      <div>
+        <p class="text-gradient text-xl font-bold sm:text-2xl">{title}</p>
+        <p class="mt-2 font-mono text-xs text-muted">{project.tags.slice(0, 3).join(' · ')}</p>
+      </div>
+    </div>
+  )}
+</div>
+
+<style>
+  .cover {
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .ph-gradient {
+    background:
+      radial-gradient(70% 90% at 15% 10%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 60%),
+      radial-gradient(60% 80% at 90% 90%, color-mix(in oklab, var(--violet) 18%, transparent), transparent 60%),
+      linear-gradient(calc(120deg + var(--h) * 1deg), var(--surface-2), var(--bg-soft));
+  }
+  .ph-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+    background-size: 16px 16px;
+    opacity: 0.8;
+  }
+  .ph-gradient > div {
+    position: relative;
+  }
+  .ph-code {
+    background:
+      linear-gradient(to bottom, color-mix(in oklab, var(--bg) 70%, var(--surface-2)), var(--bg-soft));
+    color: var(--muted);
+  }
+  .caret-sm {
+    display: inline-block;
+    width: 0.5em;
+    height: 1em;
+    vertical-align: -0.15em;
+    background: var(--accent);
+  }
+</style>

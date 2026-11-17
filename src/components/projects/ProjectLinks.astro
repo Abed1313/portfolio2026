@@ -1,0 +1,42 @@
+---
+/** GitHub / Live buttons. Renders nothing for links that are not set (no "#", no broken links). */
+import { Icon } from 'astro-icon/components';
+import type { Locale, Project } from '../../data/types';
+import { tr, useUi } from '../../lib/i18n';
+import { projectLinks } from '../../lib/projects';
+
+interface Props {
+  project: Project;
+  locale: Locale;
+  size?: 'sm' | 'md';
+}
+const { project, locale, size = 'sm' } = Astro.props;
+const ui = useUi(locale);
+const links = projectLinks(project, locale);
+const title = tr(project.title, locale);
+const sizeCls = size === 'sm' ? 'min-h-11 px-3.5 text-sm' : '';
+---
+{links.live && (
+  <a
+    href={links.live.href}
+    target="_blank"
+    rel="noopener noreferrer"
+    class:list={['btn btn-primary relative z-[2]', sizeCls]}
+    aria-label={`${links.live.label}: ${title} ${ui.a11y.opensInNewTab}`}
+  >
+    <Icon name="lucide:external-link" class="size-4" aria-hidden="true" />
+    {links.live.label}
+  </a>
+)}
+{links.github && (
+  <a
+    href={links.github}
+    target="_blank"
+    rel="noopener noreferrer"
+    class:list={['btn btn-secondary relative z-[2]', sizeCls]}
+    aria-label={`${ui.actions.viewOnGithub}: ${title} ${ui.a11y.opensInNewTab}`}
+  >
+    <Icon name="simple-icons:github" class="size-4" aria-hidden="true" />
+    {ui.actions.viewOnGithub}
+  </a>
+)}

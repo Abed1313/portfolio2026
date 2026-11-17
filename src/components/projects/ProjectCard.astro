@@ -1,0 +1,116 @@
+---
+/**
+ * Full-stack project card. The whole card opens the detail modal
+ * (a stretched "details" button), while GitHub/Live links sit above it.
+ * `featured` → large two-column card (stacks on mobile).
+ */
+import { Icon } from 'astro-icon/components';
+import type { Locale, Project } from '../../data/types';
+import { tr, useUi } from '../../lib/i18n';
+import ProjectCover from './ProjectCover.astro';
+import ProjectBadges from './ProjectBadges.astro';
+import ProjectLinks from './ProjectLinks.astro';
+
+interface Props {
+  project: Project;
+  locale: Locale;
+  /** lower-cased tags used by the filter chips */
+  filterTags: string[];
+  index: number;
+}
+const { project, locale, filterTags, index } = Astro.props;
+const ui = useUi(locale);
+const featured = !!project.featured;
+const title = tr(project.title, locale);
+---
+<article
+  class:list={[
+    'reveal card card-hover group relative flex flex-col overflow-hidden',
+    featured && 'featured md:col-span-2 lg:col-span-3 lg:grid lg:grid-cols-[1.1fr_1fr]',
+  ]}
+  style={`--i:${index % 3}`}
+  data-project-card
+  data-tags={filterTags.join('|')}
+>
+  <ProjectCover project={project} locale={locale} featured={featured} class={featured ? 'lg:aspect-auto lg:h-full lg:min-h-80 lg:border-e lg:border-b-0' : ''} />
+
+  <div class:list={['flex flex-1 flex-col', featured ? 'p-6 sm:p-8' : 'p-5 sm:p-6']}>
+    <ProjectBadges project={project} locale={locale} showFeatured={featured} />
+
+    <h3 class:list={['font-semibold text-fg', featured ? 'text-h2 mt-4' : 'text-h3 mt-3']}>{title}</h3>
+    <p class="mt-1 font-mono text-xs text-accent">{tr(project.subtitle, locale)}</p>
+
+    <p class:list={['mt-3 text-muted', !featured && 'line-clamp-3']}>{tr(project.description, locale)}</p>
+
+    {featured && (project.role || project.type || project.date) && (
+      <dl class="mt-5 grid gap-3 text-sm sm:grid-cols-3">
+        {project.role && (
+          <div>
+            <dt class="font-mono text-xs text-subtle">{ui.projects.role}</dt>
+            <dd class="mt-0.5 text-fg">{tr(project.role, locale)}</dd>
+          </div>
+        )}
+        {project.type && (
+          <div>
+            <dt class="font-mono text-xs text-subtle">{ui.projects.type}</dt>
+            <dd class="mt-0.5 text-fg">{tr(project.type, locale)}</dd>
+          </div>
+        )}
+        {project.date && (
+          <div>
+            <dt class="font-mono text-xs text-subtle">{ui.projects.date}</dt>
+            <dd class="mt-0.5 text-fg">{tr(project.date, locale)}</dd>
+          </div>
+        )}
+      </dl>
+    )}
+
+    <ul class="mt-4 flex flex-wrap gap-2">
+      {project.tags.map((t) => <li class="chip">{t}</li>)}
+    </ul>
+
+    <div class="mt-auto flex flex-wrap items-center gap-2 pt-5">
+      <ProjectLinks project={project} locale={locale} />
+      <button
+        type="button"
+        class="details-btn btn btn-ghost min-h-11 px-3 text-sm ms-auto"
+        data-dialog-open={`project-${project.id}`}
+        aria-haspopup="dialog"
+        aria-label={`${ui.actions.viewDetails}: ${title}`}
+      >
+        {ui.actions.viewDetails}
+        <Icon name="lucide:arrow-right" class="size-4 rtl:-scale-x-100 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+      </button>
+    </div>
+  </div>
+</article>
+
+<style>
+  /* stretch the details button over the whole card so the card is clickable */
+  .details-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+  }
+  /* A transform would make the button the containing block of ::after and
+     shrink the click area mid-click, so the press effect is disabled here. */
+  .details-btn:active {
+    transform: none;
+  }
+  .details-btn:focus-visible {
+    outline: none;
+  }
+  .details-btn:focus-visible::after {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    border-radius: 1rem;
+  }
+  .featured {
+    border-color: color-mix(in oklab, var(--accent) 35%, var(--border));
+    background:
+      radial-gradient(80% 120% at 100% 0%, color-mix(in oklab, var(--accent) 7%, transparent), transparent 60%),
+      color-mix(in oklab, var(--surface) 88%, transparent);
+  }
+</style>

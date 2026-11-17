@@ -1,0 +1,41 @@
+---
+/** Accessible lightbox for a certificate image (only rendered when the image exists). */
+import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
+import type { Certification, Locale } from '../../data/types';
+import { tr, useUi } from '../../lib/i18n';
+import { getCertificateImage } from '../../lib/images';
+
+interface Props {
+  cert: Certification;
+  locale: Locale;
+}
+const { cert, locale } = Astro.props;
+const ui = useUi(locale);
+const image = getCertificateImage(cert.id);
+const title = tr(cert.title, locale);
+const titleId = `cert-${cert.id}-title`;
+---
+{image && (
+  <dialog id={`cert-${cert.id}`} class="modal modal-lightbox" aria-labelledby={titleId}>
+    <div class="flex h-full max-h-[inherit] flex-col">
+      <header class="flex items-center gap-3 border-b border-line px-5 py-3">
+        <h2 id={titleId} class="min-w-0 flex-1 truncate text-base font-semibold text-fg">{title}</h2>
+        <button type="button" class="icon-btn -me-2" data-dialog-close aria-label={ui.a11y.close}>
+          <Icon name="lucide:x" class="size-5" aria-hidden="true" />
+        </button>
+      </header>
+      <div class="grid flex-1 place-items-center overflow-auto bg-bg-soft p-3 sm:p-5">
+        <Image
+          src={image}
+          alt={`${title}: ${ui.certifications.imageAlt}`}
+          widths={[640, 1000, 1400, 1800]}
+          sizes="(min-width: 768px) 1100px, 100vw"
+          class="h-auto max-h-[78dvh] w-auto max-w-full rounded-lg object-contain shadow-xl"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    </div>
+  </dialog>
+)}
