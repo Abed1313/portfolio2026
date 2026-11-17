@@ -1,0 +1,156 @@
+/**
+ * English UI strings (default locale).
+ * Personal content lives in the other src/data files; this file only holds interface text.
+ * src/data/i18n/ar.ts must provide every key (enforced by TypeScript).
+ */
+export const en = {
+  meta: {
+    title: 'Abed Al-Rahman Radwan | RPA Developer & Software Engineer',
+    description:
+      'Blue Prism RPA Developer with a .NET full-stack background, based in Amman, Jordan. Certified Blue Prism Professional Developer (PDEV01) and Certified Developer (AD01).',
+    langName: 'English',
+  },
+  a11y: {
+    skipToContent: 'Skip to content',
+    mainNav: 'Main navigation',
+    openMenu: 'Open menu',
+    closeMenu: 'Close menu',
+    toggleTheme: 'Toggle light / dark theme',
+    switchLanguage: 'Switch language',
+    backToTop: 'Back to top',
+    openCommandPalette: 'Open command palette',
+    openTerminal: 'Open terminal',
+    close: 'Close',
+    previous: 'Previous image',
+    next: 'Next image',
+    opensInNewTab: '(opens in a new tab)',
+    scrollProgress: 'Page scroll progress',
+  },
+  nav: {
+    about: 'About',
+    skills: 'Skills',
+    experience: 'Experience',
+    projects: 'Projects',
+    certifications: 'Certifications',
+    education: 'Education',
+    volunteering: 'Volunteering',
+    contact: 'Contact',
+  },
+  actions: {
+    downloadCv: 'Download CV',
+    contactMe: 'Contact Me',
+    copyEmail: 'Copy email',
+    emailCopied: 'Email copied to clipboard',
+    copyFailed: 'Could not copy. Please copy it manually.',
+    viewOnGithub: 'View on GitHub',
+    liveDemo: 'Live Demo',
+    visitWebsite: 'Visit Website',
+    viewDetails: 'View details',
+    viewCertificate: 'View Certificate',
+    openPdf: 'Open PDF',
+    verify: 'Verify',
+    goHome: 'Go home',
+  },
+  hero: {
+    greeting: "> hello world, I'm",
+    available: 'Open to opportunities',
+  },
+  sections: {
+    about: { label: 'about', title: 'About me' },
+    skills: { label: 'skills', title: 'Skills & tools' },
+    experience: { label: 'experience', title: 'Experience' },
+    projects: { label: 'projects', title: 'Projects' },
+    certifications: { label: 'certifications', title: 'Certifications & training' },
+    education: { label: 'education', title: 'Education' },
+    volunteering: { label: 'volunteering', title: 'Volunteering' },
+    contact: { label: 'contact', title: "Let's talk" },
+  },
+  about: {
+    quickFacts: 'Quick facts',
+    location: 'Location',
+    currentRole: 'Current role',
+    languages: 'Languages',
+    currentlyWorkingOn: 'Currently working on',
+    photoAlt: 'Portrait of Abed Al-Rahman Radwan',
+  },
+  experience: {
+    present: 'Present',
+    current: 'current',
+  },
+  projects: {
+    tabFullStack: 'Full-Stack Development',
+    tabRpa: 'RPA Automation',
+    filterAll: 'All',
+    filterLabel: 'Filter by technology',
+    featured: 'Featured',
+    confidential: 'Enterprise project · details confidential',
+    role: 'Role',
+    type: 'Type',
+    date: 'Date',
+    gallery: 'Screenshots',
+    noResults: 'No projects match this filter.',
+    status: {
+      'in-progress': 'In Testing',
+      live: 'Live',
+      archived: 'Archived',
+    },
+  },
+  certifications: {
+    official: 'Official certifications',
+    verified: 'Verified credential',
+    training: 'Training & courses',
+    filterAll: 'All',
+    categories: 'Filter by category',
+  },
+  contact: {
+    intro:
+      "Recruiting for an RPA, automation, or software role? Send me a message and I'll get back to you.",
+    name: 'name',
+    email: 'email',
+    message: 'message',
+    namePlaceholder: 'Your name',
+    emailPlaceholder: 'you@company.com',
+    messagePlaceholder: 'Tell me about the role or project…',
+    send: 'send --message',
+    sending: 'sending…',
+    success: 'Message sent. Thank you! I will reply soon.',
+    error: 'Something went wrong. Please email me directly.',
+    notConfigured: 'The contact form is not configured yet. Please email me directly.',
+    errors: {
+      name: 'Please enter your name (2–100 characters).',
+      email: 'Please enter a valid email address.',
+      message: 'Please write a message (10–5000 characters).',
+    },
+    orEmail: 'Or email me directly',
+    findMe: 'Find me on',
+  },
+  footer: {
+    available: 'Open to opportunities',
+    builtWith: 'Built with Astro',
+  },
+  palette: {
+    placeholder: 'Type a command or search…',
+    groupNavigate: 'Navigate',
+    groupActions: 'Actions',
+    groupLinks: 'Links',
+    toggleTheme: 'Toggle theme',
+    switchLanguage: 'Switch to Arabic',
+    openTerminal: 'Open terminal',
+    noResults: 'No matching commands',
+    hint: 'Navigate with ↑ ↓, run with Enter, close with Esc',
+  },
+  terminal: {
+    title: 'terminal: zsh',
+    welcome: "Welcome! Type 'help' to see available commands.",
+    notFound: 'command not found',
+    help: 'Available commands',
+  },
+  notFound: {
+    title: 'Error 404: route not found',
+    description: 'The page you requested does not exist or was moved.',
+  },
+} as const;
+
+/** Widen literal types so ar.ts can supply different strings with the same shape. */
+type Widen<T> = { [K in keyof T]: T[K] extends string ? string : Widen<T[K]> };
+export type UiStrings = Widen<typeof en>;

@@ -1,0 +1,52 @@
+---
+/**
+ * PHASE 1 TEMPORARY PAGE
+ * Proves the data layer + image resolver compile and render.
+ * Replaced by the real single-page layout in Phase 2.
+ */
+import '../styles/global.css';
+import { profile } from '../data/profile';
+import { siteConfig } from '../data/site.config';
+import { skillCategories } from '../data/skills';
+import { experience } from '../data/experience';
+import { projects, rpaProjects } from '../data/projects';
+import { education } from '../data/education';
+import { certifications } from '../data/certifications';
+import { volunteering } from '../data/volunteering';
+import { tr, getLocale } from '../lib/i18n';
+import { isSet } from '../lib/links';
+import { getProfilePhoto, getProjectCover, getCertificateImage, hasPublicFile } from '../lib/images';
+
+const locale = getLocale(Astro.currentLocale);
+const rows: [string, string][] = [
+  ['name', tr(profile.name, locale)],
+  ['headline', tr(profile.headline, locale)],
+  ['skill categories', String(skillCategories.length)],
+  ['experience items', String(experience.length)],
+  ['full-stack projects', String(projects.length)],
+  ['rpa projects', String(rpaProjects.length)],
+  ['education', String(education.length)],
+  ['certifications', String(certifications.length)],
+  ['volunteering', String(volunteering.length)],
+  ['profile photo found', String(Boolean(getProfilePhoto()))],
+  ['project covers found', String(projects.filter((p) => getProjectCover(p.id)).length)],
+  ['certificate images found', String(certifications.filter((c) => getCertificateImage(c.id)).length)],
+  ['CV present', String(hasPublicFile(siteConfig.cv.path))],
+  ['github repo links set', String(projects.filter((p) => isSet(p.githubUrl)).length)],
+];
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 1: data check</title>
+  </head>
+  <body class="bg-slate-950 text-slate-100 font-mono p-6">
+    <h1 class="text-xl mb-4">// phase 1 data check</h1>
+    <table>
+      {rows.map(([k, v]) => (
+        <tr><td class="pr-6 text-teal-400">{k}</td><td>{v}</td></tr>
+      ))}
+    </table>
+  </body>
+</html>
