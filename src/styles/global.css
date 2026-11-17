@@ -3,10 +3,12 @@
 /* Fonts (self-hosted, subset per unicode-range: only used subsets download) */
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/jetbrains-mono";
-@import "@fontsource/ibm-plex-sans-arabic/400.css";
-@import "@fontsource/ibm-plex-sans-arabic/500.css";
-@import "@fontsource/ibm-plex-sans-arabic/600.css";
-@import "@fontsource/ibm-plex-sans-arabic/700.css";
+/* Arabic subset only: Latin text on the Arabic page uses Inter (already loaded),
+   so we avoid downloading Plex's Latin glyphs (4 fewer font files + re-layouts). */
+@import "@fontsource/ibm-plex-sans-arabic/arabic-400.css";
+@import "@fontsource/ibm-plex-sans-arabic/arabic-500.css";
+@import "@fontsource/ibm-plex-sans-arabic/arabic-600.css";
+@import "@fontsource/ibm-plex-sans-arabic/arabic-700.css";
 
 /* Dark mode is driven by <html data-theme="…"> (set before paint in BaseLayout). */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -185,7 +187,6 @@
     line-height: 1.35;
   }
 
-  p { text-wrap: pretty; }
 
   ::selection {
     background: color-mix(in oklab, var(--accent) 30%, transparent);
@@ -243,6 +244,14 @@
 
   .section {
     padding-block: clamp(4rem, 3rem + 5vw, 7.5rem);
+    /* Skip layout/paint of off-screen sections until they approach the viewport.
+       `auto 900px` = placeholder height until the real size is known, then remembered. */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 900px;
+  }
+  /* Rendered for real (see src/scripts/sections.ts): exact heights for #anchor jumps. */
+  .section.cv-done {
+    content-visibility: visible;
   }
 
   /* Fluid type scale */
@@ -336,7 +345,7 @@
   .filter-chip[aria-pressed="true"] {
     color: var(--accent);
     border-color: color-mix(in oklab, var(--accent) 60%, transparent);
-    background: color-mix(in oklab, var(--accent) 10%, transparent);
+    background: color-mix(in oklab, var(--accent) 7%, transparent); /* ≥4.5:1 text contrast in both themes */
   }
 
   /* ---------- Buttons ---------- */

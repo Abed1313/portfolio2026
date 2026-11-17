@@ -1,6 +1,7 @@
 /** Command palette: open (Ctrl/⌘+K or [data-palette-open]), filter, keyboard navigation, run. */
 import { toggleTheme } from './theme';
 import { copyText, showToast } from './toast';
+import { scrollToTarget } from './sections';
 
 const dialog = document.querySelector<HTMLDialogElement>('#command-palette');
 
@@ -55,8 +56,7 @@ if (dialog) {
       const target = document.querySelector<HTMLElement>(cmd.slice(5));
       if (target) {
         history.pushState(null, '', cmd.slice(5));
-        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+        scrollToTarget(target);
         target.querySelector<HTMLElement>('h2')?.setAttribute('tabindex', '-1');
         target.querySelector<HTMLElement>('h2')?.focus({ preventScroll: true });
       }

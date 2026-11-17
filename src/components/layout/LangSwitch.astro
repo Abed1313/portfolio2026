@@ -19,11 +19,14 @@ const targetUi = useUi(target);
   lang={localeMeta[target].htmlLang}
   data-lang-switch
   class:list={variant === 'icon' ? 'icon-btn font-semibold' : 'btn btn-secondary w-full'}
-  aria-label={`${ui.a11y.switchLanguage}: ${targetUi.meta.langName}`}
   title={targetUi.meta.langName}
 >
+  {/* Accessible name = hidden prefix + visible label, so the visible text is part of the name. */}
+  <span class="sr-only">{ui.a11y.switchLanguage}:</span>
   {variant === 'icon' ? (
-    <span class:list={['text-sm', target === 'ar' ? 'font-arabic text-base' : 'font-mono']} aria-hidden="true">{localeMeta[target].label}</span>
+    <span class:list={['text-sm', target === 'ar' ? 'font-arabic text-base' : 'font-mono']}>
+      {localeMeta[target].label}<span class="sr-only"> ({targetUi.meta.langName})</span>
+    </span>
   ) : (
     <span>{targetUi.meta.langName}</span>
   )}

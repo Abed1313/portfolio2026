@@ -64,9 +64,15 @@ menu?.querySelectorAll<HTMLElement>('[data-menu-action]').forEach((b) => {
 // Language switch keeps the current section: /#projects → /ar/#projects
 document.querySelectorAll<HTMLAnchorElement>('[data-lang-switch]').forEach((a) => {
   a.addEventListener('click', () => {
-    const current = document.querySelector('[data-nav-link][aria-current="true"]')?.getAttribute('data-nav-link');
-    const hash = current ? `#${current}` : location.hash;
-    if (hash) a.href = a.href.split('#')[0] + hash;
+    // Measure at click time: the section covering a line ~30% down the viewport.
+    // (More reliable than the highlighted nav link, which updates asynchronously.)
+    const y = window.innerHeight * 0.3;
+    const current = targets.find((t) => {
+      const r = t.getBoundingClientRect();
+      return r.top <= y && r.bottom > y;
+    });
+    const hash = current ? `#${current.id}` : '';
+    a.href = a.href.split('#')[0] + hash;
   });
 });
 

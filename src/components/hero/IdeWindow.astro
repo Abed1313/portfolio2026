@@ -141,12 +141,14 @@ const tabs = [
 </div>
 
 <script>
-  import '../../scripts/ide';
+  import '../../scripts/ide.ts';
 </script>
 
 <style>
   .ide {
-    background: color-mix(in oklab, var(--surface) 90%, transparent);
+    /* solid, so the typing cover can match it exactly */
+    --ide-bg: var(--surface);
+    background: var(--ide-bg);
   }
   .ide-tab[aria-selected='true'] {
     color: var(--text);
@@ -169,7 +171,11 @@ const tabs = [
   }
 
   .code-line {
+    position: relative;
     display: block;
+    width: max-content;
+    min-width: 100%;
+    overflow: hidden;
     padding-inline-end: 1.25rem;
     white-space: pre;
     color: var(--text);
@@ -180,7 +186,6 @@ const tabs = [
     padding-inline-end: 1rem;
     text-align: right;
     color: var(--subtle);
-    opacity: 0.6;
     user-select: none;
   }
   @media (max-width: 639px) {
@@ -209,22 +214,27 @@ const tabs = [
     animation: blink 1.1s steps(1) infinite;
   }
 
-  /* typed-out effect: each line is revealed left→right, one after another */
-  :global(.js) .code-line {
-    clip-path: inset(0 100% 0 0);
+  /* Typed-out effect: a cover in the panel colour slides off each line, left→right.
+     transform-only (GPU-composited) so it costs no layout/paint work. */
+  :global(.js) .code-line::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--ide-bg);
+    transform: translateX(0);
     animation: type-line 0.45s steps(24, end) forwards;
     animation-delay: calc(0.35s + var(--i) * 0.16s);
+    pointer-events: none;
   }
   @keyframes type-line {
-    to { clip-path: inset(0 0 0 0); }
+    to { transform: translateX(100%); }
   }
   @keyframes blink {
     50% { opacity: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
-    :global(.js) .code-line {
-      animation: none;
-      clip-path: none;
+    :global(.js) .code-line::after {
+      display: none;
     }
     .caret { animation: none; }
   }

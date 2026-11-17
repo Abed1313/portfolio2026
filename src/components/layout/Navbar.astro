@@ -53,11 +53,11 @@ const links = sections.map((s) => ({ ...s, label: ui.nav[s.id] }));
           type="button"
           class="hidden min-h-11 items-center gap-2 rounded-full border border-line px-3 text-xs text-muted transition-colors hover:border-line-strong hover:text-fg lg:inline-flex"
           data-palette-open
-          aria-label={ui.a11y.openCommandPalette}
           aria-haspopup="dialog"
           aria-keyshortcuts="Control+K Meta+K"
         >
           <Icon name="lucide:search" class="size-4" aria-hidden="true" />
+          <span class="sr-only">{ui.a11y.openCommandPalette}:</span>
           <kbd class="whitespace-nowrap font-mono" data-kbd-hint>Ctrl K</kbd>
         </button>
       )}
@@ -124,7 +124,7 @@ const links = sections.map((s) => ({ ...s, label: ui.nav[s.id] }));
 </dialog>
 
 <script>
-  import '../../scripts/nav';
+  import '../../scripts/nav.ts';
 </script>
 
 <style is:global>

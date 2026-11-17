@@ -213,8 +213,13 @@ const check = (name, ok, extra = '') => results.push(`${ok ? 'PASS' : 'FAIL'}  $
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'dark', permissions: [] });
   const page = await ctx.newPage();
   await page.goto(base + '/', { waitUntil: 'networkidle' });
-  await page.evaluate(() => document.getElementById('projects').scrollIntoView());
-  await page.waitForTimeout(1800);
+  // Immediately after load (sections not yet rendered): nav links must still land exactly.
+  for (const id of ['certifications', 'projects']) {
+    await page.click(`nav [data-nav-link="${id}"]`);
+    await page.waitForTimeout(1800);
+    const top = await page.evaluate((id) => Math.round(document.getElementById(id).getBoundingClientRect().top), id);
+    check(`nav link lands on #${id}`, Math.abs(top - 96) <= 4, `top=${top}px`);
+  }
   await page.click('nav [data-lang-switch]');
   await page.waitForLoadState('networkidle');
   check('language switch → /ar/ keeps section', page.url().endsWith('/ar/#projects'), page.url());

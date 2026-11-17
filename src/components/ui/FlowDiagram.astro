@@ -1,9 +1,12 @@
 ---
 /**
- * Animated automation flow (pure CSS, no JS).
+ * Animated automation flow (CSS only).
  * - vertical:   used in the hero `workflow.bp` tab (label + status per step)
  * - horizontal: compact version for RPA project cards
- * Animation loop assumes 5 steps (1s per step); fewer/more steps still render, just with gaps.
+ *
+ * Performance: every animation uses only `opacity` / `transform` (GPU-composited),
+ * and src/scripts/flow.ts pauses diagrams that are off-screen or hidden.
+ * The loop assumes 5 steps (1s per step); other counts still render.
  * Disabled automatically under prefers-reduced-motion.
  */
 import { Icon } from 'astro-icon/components';
@@ -31,7 +34,7 @@ const kindColor: Record<NonNullable<FlowStep['kind']>, string> = {
 };
 ---
 {orientation === 'vertical' ? (
-  <ol class:list={['flow flow-v', className]} dir="ltr">
+  <ol class:list={['flow flow-v', className]} dir="ltr" data-flow>
     {steps.map((step, i) => (
       <li class="flow-row" style={`--s:${i}`}>
         <span class:list={['flow-node', kindColor[step.kind ?? 'process']]}>
@@ -40,13 +43,13 @@ const kindColor: Record<NonNullable<FlowStep['kind']>, string> = {
         <span class="min-w-0 flex-1 truncate text-sm font-medium text-fg" dir="auto">{tr(step.label, locale)}</span>
         {statuses[i] && <span class="flow-status font-mono text-xs">{statuses[i]}</span>}
         {i < steps.length - 1 && (
-          <span class="flow-link-v" aria-hidden="true"><span class="flow-packet"></span></span>
+          <span class="flow-link-v" aria-hidden="true"><span class="flow-track"><span class="flow-packet"></span></span></span>
         )}
       </li>
     ))}
   </ol>
 ) : (
-  <ol class:list={['flow flow-h', className]}>
+  <ol class:list={['flow flow-h', className]} data-flow>
     {steps.map((step, i) => (
       <>
         <li class="flow-step" style={`--s:${i}`}>
@@ -56,12 +59,18 @@ const kindColor: Record<NonNullable<FlowStep['kind']>, string> = {
           <span class="flow-label">{tr(step.label, locale)}</span>
         </li>
         {i < steps.length - 1 && (
-          <li class="flow-link-h" aria-hidden="true" style={`--s:${i}`}><span class="flow-packet"></span></li>
+          <li class="flow-link-h" aria-hidden="true" style={`--s:${i}`}>
+            <span class="flow-track"><span class="flow-packet"></span></span>
+          </li>
         )}
       </>
     ))}
   </ol>
 )}
+
+<script>
+  import '../../scripts/flow.ts';
+</script>
 
 <style>
   .flow {
@@ -70,8 +79,15 @@ const kindColor: Record<NonNullable<FlowStep['kind']>, string> = {
     margin: 0;
     padding: 0;
   }
+  .flow[data-paused] :is(.flow-node, .flow-status, .flow-track)::before,
+  .flow[data-paused] :is(.flow-node, .flow-status, .flow-track)::after,
+  .flow[data-paused] .flow-track {
+    animation-play-state: paused;
+  }
 
+  /* ---------- node + "active" ring (opacity only) ---------- */
   .flow-node {
+    position: relative;
     display: inline-grid;
     place-items: center;
     flex: none;
@@ -80,7 +96,16 @@ const kindColor: Record<NonNullable<FlowStep['kind']>, string> = {
     border-radius: 0.65rem;
     border: 1px solid var(--border-strong);
     background: var(--surface-2);
-    animation: node-active var(--cycle) ease-in-out infinite;
+  }
+  .flow-node::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 16%, transparent);
+    opacity: 0;
+    animation: flow-on var(--cycle) ease-in-out infinite;
     animation-delay: calc(var(--s) * 1s);
   }
 
@@ -97,8 +122,21 @@ const kindColor: Record<NonNullable<FlowStep['kind']>, string> = {
     gap: 0.85rem;
   }
   .flow-status {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     color: var(--subtle);
-    animation: status-active var(--cycle) ease-in-out infinite;
+  }
+  /* small indicator dot that lights up with its step */
+  .flow-status::before {
+    content: '';
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: var(--accent);
+    opacity: 0.15;
+    animation: flow-dot var(--cycle) ease-in-out infinite;
     animation-delay: calc(var(--s) * 1s);
   }
   .flow-link-v {
@@ -109,9 +147,12 @@ const kindColor: Record<NonNullable<FlowStep['kind']>, string> = {
     width: 2px;
     background: repeating-linear-gradient(to bottom, var(--border-strong) 0 3px, transparent 3px 6px);
   }
+  .flow-link-v .flow-track {
+    animation-name: flow-move-y;
+  }
   .flow-link-v .flow-packet {
+    top: -6px;
     left: -2px;
-    animation-name: packet-v;
   }
 
   /* ---------- horizontal ---------- */
@@ -144,11 +185,27 @@ const kindColor: Record<NonNullable<FlowStep['kind']>, string> = {
     margin-inline: -0.6rem;
     background: repeating-linear-gradient(to right, var(--border-strong) 0 3px, transparent 3px 6px);
   }
+  .flow-link-h .flow-track {
+    animation-name: flow-move-x;
+  }
   .flow-link-h .flow-packet {
     top: -2px;
-    animation-name: packet-h;
+    inset-inline-start: -6px;
+  }
+  :global([dir='rtl']) .flow-link-h .flow-track {
+    animation-name: flow-move-x-rtl;
   }
 
+  /* ---------- the moving packet: a full-size track translated by its own size ---------- */
+  .flow-track {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    animation-duration: var(--cycle);
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+    animation-delay: calc(var(--s) * 1s);
+  }
   .flow-packet {
     position: absolute;
     width: 6px;
@@ -156,44 +213,36 @@ const kindColor: Record<NonNullable<FlowStep['kind']>, string> = {
     border-radius: 999px;
     background: var(--accent-2);
     box-shadow: 0 0 10px var(--accent-2);
-    opacity: 0;
-    animation-duration: var(--cycle);
-    animation-iteration-count: infinite;
-    animation-timing-function: ease-in-out;
-    animation-delay: calc(var(--s) * 1s);
   }
 
-  @keyframes node-active {
-    0%, 22%, 100% {
-      border-color: var(--border-strong);
-      box-shadow: none;
-    }
-    6%, 16% {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 16%, transparent);
-    }
+  @keyframes flow-on {
+    0%, 22%, 100% { opacity: 0; }
+    6%, 16% { opacity: 1; }
   }
-  @keyframes status-active {
-    0%, 22%, 100% { color: var(--subtle); }
-    6%, 16% { color: var(--accent); }
+  @keyframes flow-dot {
+    0%, 22%, 100% { opacity: 0.15; }
+    6%, 16% { opacity: 1; }
   }
-  @keyframes packet-v {
-    0%, 8% { top: 0; opacity: 0; }
-    10% { opacity: 1; }
-    19% { opacity: 1; }
-    21%, 100% { top: calc(100% - 6px); opacity: 0; }
+  @keyframes flow-move-y {
+    0%, 8% { transform: translateY(0); opacity: 0; }
+    10%, 19% { opacity: 1; }
+    21%, 100% { transform: translateY(100%); opacity: 0; }
   }
-  @keyframes packet-h {
-    0%, 8% { inset-inline-start: 0; opacity: 0; }
-    10% { opacity: 1; }
-    19% { opacity: 1; }
-    21%, 100% { inset-inline-start: calc(100% - 6px); opacity: 0; }
+  @keyframes flow-move-x {
+    0%, 8% { transform: translateX(0); opacity: 0; }
+    10%, 19% { opacity: 1; }
+    21%, 100% { transform: translateX(100%); opacity: 0; }
+  }
+  @keyframes flow-move-x-rtl {
+    0%, 8% { transform: translateX(0); opacity: 0; }
+    10%, 19% { opacity: 1; }
+    21%, 100% { transform: translateX(-100%); opacity: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .flow-node,
-    .flow-status,
-    .flow-packet {
+    .flow-node::after,
+    .flow-status::before,
+    .flow-track {
       animation: none !important;
     }
   }

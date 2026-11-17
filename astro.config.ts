@@ -9,6 +9,9 @@ export default defineConfig({
   site: siteConfig.url,
   output: 'static',
 
+  // Inline the CSS into each page: saves a render-blocking request (faster first paint).
+  build: { inlineStylesheets: 'always' },
+
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'ar'],

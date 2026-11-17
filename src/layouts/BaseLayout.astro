@@ -9,6 +9,7 @@ import { getImage } from 'astro:assets';
 // Vite emits these once (same file as the @font-face in global.css), so preload + CSS share one URL.
 import interLatin from '../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 import monoLatin from '../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
+import arabic400 from '../../node_modules/@fontsource/ibm-plex-sans-arabic/files/ibm-plex-sans-arabic-arabic-400-normal.woff2?url';
 import ogDefault from '../assets/og-default.png';
 import type { Locale } from '../data/types';
 import { localeMeta, locales } from '../data/i18n';
@@ -131,6 +132,7 @@ const jsonLd = {
 
     <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={monoLatin} as="font" type="font/woff2" crossorigin />
+    {locale === 'ar' && <link rel="preload" href={arabic400} as="font" type="font/woff2" crossorigin />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -160,10 +162,11 @@ const jsonLd = {
     <div id="toast-root" aria-live="polite"></div>
 
     <script>
-      import '../scripts/reveal';
-      import '../scripts/spotlight';
-      import '../scripts/toast';
-      import '../scripts/dialogs';
+      import '../scripts/sections.ts';
+      import '../scripts/reveal.ts';
+      import '../scripts/spotlight.ts';
+      import '../scripts/toast.ts';
+      import '../scripts/dialogs.ts';
     </script>
   </body>
 </html>

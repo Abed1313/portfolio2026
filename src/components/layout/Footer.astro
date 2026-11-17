@@ -37,12 +37,15 @@ const ui = useUi(locale);
     <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
       {showTools && (
         <>
-          <button type="button" class="status-btn" data-terminal-open aria-haspopup="dialog" aria-label={ui.a11y.openTerminal}>
+          {/* Accessible name = sr-only text + the visible text (so the visible label is part of the name). */}
+          <button type="button" class="status-btn" data-terminal-open aria-haspopup="dialog">
             <Icon name="lucide:square-terminal" class="size-3.5" aria-hidden="true" />
-            <bdi dir="ltr">&gt;_ terminal</bdi>
+            <span class="sr-only">{ui.a11y.openTerminal}:</span>
+            <bdi dir="ltr"><span aria-hidden="true">&gt;_ </span>terminal</bdi>
           </button>
-          <button type="button" class="status-btn" data-palette-open aria-haspopup="dialog" aria-label={ui.a11y.openCommandPalette}>
+          <button type="button" class="status-btn" data-palette-open aria-haspopup="dialog">
             <Icon name="lucide:command" class="size-3.5" aria-hidden="true" />
+            <span class="sr-only">{ui.a11y.openCommandPalette}:</span>
             <bdi dir="ltr" data-kbd-hint>Ctrl K</bdi>
           </button>
         </>
