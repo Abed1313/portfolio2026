@@ -1,0 +1,26 @@
+---
+/** Initials badge used when a logo/photo file is missing. */
+interface Props {
+  text: string;
+  class?: string;
+}
+const { text, class: className = '' } = Astro.props;
+
+const initials =
+  text
+    .replace(/[®™()]/g, '')
+    .split(/[\s/\-]+/)
+    .filter((w) => /^[A-Za-zÀ-ÿ0-9]/.test(w))
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join('') || '•';
+---
+<span
+  class:list={[
+    'inline-grid shrink-0 place-items-center rounded-xl border border-line bg-surface-2 font-mono font-semibold text-accent',
+    className,
+  ]}
+  aria-hidden="true"
+>
+  {initials}
+</span>

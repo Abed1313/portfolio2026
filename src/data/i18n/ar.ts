@@ -39,6 +39,7 @@ export const ar: UiStrings = {
   },
   actions: {
     downloadCv: 'تحميل السيرة الذاتية',
+    cvShort: 'السيرة',
     contactMe: 'تواصل معي',
     copyEmail: 'نسخ البريد',
     emailCopied: 'تم نسخ البريد الإلكتروني',
@@ -55,6 +56,15 @@ export const ar: UiStrings = {
   hero: {
     greeting: '> مرحبًا بالعالم، أنا',
     available: 'متاح لفرص عمل',
+    socialLabel: 'روابط التواصل',
+    ideLabel: 'معاينة محرر الشيفرة',
+    flow: {
+      trigger: 'المشغّل',
+      queue: 'قائمة العمل',
+      process: 'المعالجة',
+      validate: 'التحقق',
+      done: 'تم',
+    },
   },
   sections: {
     about: { label: 'about', title: 'نبذة عني' },

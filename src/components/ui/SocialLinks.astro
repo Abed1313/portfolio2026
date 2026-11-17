@@ -1,0 +1,38 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { Locale } from '../../data/types';
+import { profile } from '../../data/profile';
+import { siteConfig } from '../../data/site.config';
+import { isSet } from '../../lib/links';
+import { useUi } from '../../lib/i18n';
+
+interface Props {
+  locale: Locale;
+  class?: string;
+  label?: string;
+}
+
+const { locale, class: className = '', label } = Astro.props;
+const ui = useUi(locale);
+
+/* Links that are empty / "[PLACEHOLDER]" are dropped automatically. */
+const links = [
+  { href: siteConfig.social.github, label: 'GitHub', icon: 'simple-icons:github', external: true },
+  { href: siteConfig.social.linkedin, label: 'LinkedIn', icon: 'simple-icons:linkedin', external: true },
+  { href: `mailto:${profile.email}`, label: 'Email', icon: 'lucide:mail', external: false },
+].filter((l) => isSet(l.href));
+---
+<ul class:list={['flex items-center gap-1', className]} aria-label={label ?? ui.hero.socialLabel}>
+  {links.map((l) => (
+    <li>
+      <a
+        href={l.href}
+        class="icon-btn"
+        aria-label={l.external ? `${l.label} ${ui.a11y.opensInNewTab}` : `${l.label}: ${profile.email}`}
+        {...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      >
+        <Icon name={l.icon} class="size-5" aria-hidden="true" />
+      </a>
+    </li>
+  ))}
+</ul>

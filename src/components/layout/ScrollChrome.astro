@@ -1,0 +1,32 @@
+---
+/** Scroll progress bar (top) + back-to-top button (bottom corner). */
+import { Icon } from 'astro-icon/components';
+import type { Locale } from '../../data/types';
+import { useUi } from '../../lib/i18n';
+
+interface Props {
+  locale: Locale;
+}
+const ui = useUi(Astro.props.locale);
+---
+<div class="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[3px]" aria-hidden="true">
+  <div
+    data-scroll-progress
+    class="h-full w-full origin-left scale-x-0 bg-gradient-to-r from-accent-strong to-accent-2 rtl:origin-right"
+  >
+  </div>
+</div>
+
+<button
+  type="button"
+  data-back-to-top
+  data-visible="false"
+  aria-label={ui.a11y.backToTop}
+  class="icon-btn fixed end-4 bottom-4 z-40 border-line! bg-surface! text-fg! shadow-lg transition-[opacity,translate,visibility] duration-300 data-[visible=false]:invisible data-[visible=false]:translate-y-3 data-[visible=false]:opacity-0 sm:end-6 sm:bottom-6"
+>
+  <Icon name="lucide:arrow-up" class="size-5" aria-hidden="true" />
+</button>
+
+<script>
+  import '../../scripts/scroll';
+</script>

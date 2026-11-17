@@ -1,0 +1,109 @@
+---
+import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
+import type { Locale } from '../../data/types';
+import { profile } from '../../data/profile';
+import { tr, useUi } from '../../lib/i18n';
+import { getProfilePhoto } from '../../lib/images';
+import SectionHeader from '../ui/SectionHeader.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const ui = useUi(locale);
+const photo = getProfilePhoto();
+---
+<section id="about" class="section" aria-labelledby="about-title">
+  <div class="container-page">
+    <SectionHeader id="about" locale={locale} />
+
+    <!-- Bento: 1 col phone → 2 col tablet → 4 col desktop. `grid-flow-dense` fills gaps on tablet. -->
+    <div class="grid grid-flow-row-dense gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <!-- photo -->
+      <div class="reveal card card-hover overflow-hidden lg:row-span-2" style="--i:0">
+        {photo ? (
+          <Image
+            src={photo}
+            alt={ui.about.photoAlt}
+            widths={[320, 480, 640, 800]}
+            sizes="(min-width: 1024px) 280px, (min-width: 768px) 45vw, 92vw"
+            class="aspect-square h-full w-full object-cover object-[center_25%] max-md:aspect-[4/3]"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div class="avatar-fallback relative grid aspect-square h-full w-full max-md:aspect-[4/3] place-items-center overflow-hidden" role="img" aria-label={ui.about.photoAlt}>
+            <span class="font-mono text-6xl font-bold text-gradient sm:text-7xl" aria-hidden="true">{profile.initials}</span>
+            <span class="absolute bottom-4 font-mono text-xs text-subtle" aria-hidden="true" dir="ltr">&lt;img src="me.webp" /&gt;</span>
+          </div>
+        )}
+      </div>
+
+      <!-- summary -->
+      <div class="reveal card card-hover p-6 sm:p-8 md:col-span-2" style="--i:1">
+        <p class="mb-3 font-mono text-xs text-syn-com" dir="ltr">/** summary */</p>
+        <p class="text-lead text-fg/90 leading-relaxed">{tr(profile.summary, locale)}</p>
+      </div>
+
+      <!-- quick facts -->
+      <div class="reveal card card-hover p-6 lg:row-span-2" style="--i:2">
+        <h3 class="mb-5 font-mono text-sm font-medium text-accent">{ui.about.quickFacts}</h3>
+        <dl class="grid gap-5">
+          <div>
+            <dt class="flex items-center gap-2 text-sm text-muted">
+              <Icon name="lucide:map-pin" class="size-4" aria-hidden="true" />{ui.about.location}
+            </dt>
+            <dd class="mt-1 font-medium text-fg">{tr(profile.location, locale)}</dd>
+          </div>
+          <div>
+            <dt class="flex items-center gap-2 text-sm text-muted">
+              <Icon name="lucide:briefcase" class="size-4" aria-hidden="true" />{ui.about.currentRole}
+            </dt>
+            <dd class="mt-1 font-medium text-fg">{tr(profile.currentRole, locale)}</dd>
+          </div>
+          <div>
+            <dt class="flex items-center gap-2 text-sm text-muted">
+              <Icon name="lucide:languages" class="size-4" aria-hidden="true" />{ui.about.languages}
+            </dt>
+            <dd class="mt-2">
+              <ul class="grid gap-2">
+                {profile.languages.map((l) => (
+                  <li class="flex items-center justify-between gap-3">
+                    <span class="font-medium text-fg">{tr(l.name, locale)}</span>
+                    <span class="chip">{tr(l.level, locale)}</span>
+                  </li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- currently working on -->
+      <div class="reveal card card-hover p-6 sm:p-8 md:col-span-2" style="--i:3">
+        <h3 class="mb-4 flex items-center gap-2 font-mono text-sm font-medium text-accent">
+          <span class="status-dot" aria-hidden="true"></span>
+          {ui.about.currentlyWorkingOn}
+        </h3>
+        <ul class="grid gap-3">
+          {profile.currentlyWorkingOn.map((item) => (
+            <li class="flex items-start gap-3 text-fg">
+              <Icon name="lucide:chevron-right" class="mt-1 size-4 shrink-0 text-accent rtl:-scale-x-100" aria-hidden="true" />
+              <span>{tr(item, locale)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .avatar-fallback {
+    background:
+      radial-gradient(60% 60% at 30% 25%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 70%),
+      radial-gradient(50% 50% at 80% 80%, color-mix(in oklab, var(--violet) 14%, transparent), transparent 70%),
+      var(--surface-2);
+  }
+</style>

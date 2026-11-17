@@ -1,0 +1,74 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { Locale } from '../../data/types';
+import { skillCategories } from '../../data/skills';
+import { tr } from '../../lib/i18n';
+import SectionHeader from '../ui/SectionHeader.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+
+/* Bento rhythm on desktop (3 cols): narrow, wide / wide, narrow. Tablet: 2 equal cols. Phone: 1 col. */
+const spans = ['lg:col-span-1', 'lg:col-span-2', 'lg:col-span-2', 'lg:col-span-1'];
+---
+<section id="skills" class="section" aria-labelledby="skills-title">
+  <div class="container-page">
+    <SectionHeader id="skills" locale={locale} />
+
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {skillCategories.map((cat, i) => (
+        <article class:list={['reveal card card-hover group p-6', spans[i % spans.length]]} style={`--i:${i}`}>
+          <header class="mb-5 flex items-center gap-3">
+            <span class="grid size-10 place-items-center rounded-xl border border-line bg-surface-2 text-accent">
+              <Icon name={cat.icon} class="size-5" aria-hidden="true" />
+            </span>
+            <h3 class="text-h3 font-semibold text-fg">{tr(cat.title, locale)}</h3>
+            <span class="ms-auto font-mono text-xs text-subtle" dir="ltr">[{cat.skills.length}]</span>
+          </header>
+          <ul class="flex flex-wrap gap-2">
+            {cat.skills.map((skill) => (
+              <li class="skill">
+                {skill.icon && <Icon name={skill.icon} class="size-4 shrink-0" aria-hidden="true" />}
+                <span>{tr(skill.name, locale)}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .skill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.25rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 0.65rem;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    font-size: 0.9rem;
+    color: var(--text);
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease,
+      color 0.2s ease;
+  }
+  .skill :global(svg) {
+    color: var(--muted);
+    transition: color 0.2s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .skill:hover {
+      border-color: color-mix(in oklab, var(--accent) 55%, transparent);
+      transform: translateY(-2px);
+    }
+    .skill:hover :global(svg) {
+      color: var(--accent);
+    }
+  }
+</style>

@@ -1,0 +1,28 @@
+---
+/** The single-page portfolio, shared by / (en) and /ar/ (ar). */
+import type { Locale } from '../data/types';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from './layout/Navbar.astro';
+import Footer from './layout/Footer.astro';
+import ScrollChrome from './layout/ScrollChrome.astro';
+import Hero from './sections/Hero.astro';
+import About from './sections/About.astro';
+import Skills from './sections/Skills.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+---
+<BaseLayout locale={locale}>
+  <ScrollChrome locale={locale} />
+  <Navbar locale={locale} />
+  <main id="main">
+    <Hero locale={locale} />
+    <About locale={locale} />
+    <Skills locale={locale} />
+    {/* Phase 3: Experience, Projects, Certifications, Education, Volunteering */}
+    {/* Phase 4: Contact */}
+  </main>
+  <Footer locale={locale} />
+</BaseLayout>

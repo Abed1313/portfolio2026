@@ -47,6 +47,8 @@ export interface Profile {
   summary: Text;
   languages: SpokenLanguage[];
   currentRole: Text;
+  /** Short tech list shown in the hero `profile.ts` code window. */
+  heroStack: string[];
   /** Items in the About → "currently working on" card. */
   currentlyWorkingOn: Text[];
 }

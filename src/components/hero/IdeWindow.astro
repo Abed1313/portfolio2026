@@ -1,0 +1,231 @@
+---
+/**
+ * IDE-style window for the hero.
+ *  Tab 1 `profile.ts`  : TypeScript object generated from src/data (typed-out effect, CSS only)
+ *  Tab 2 `workflow.bp` : animated automation flow
+ * Tabs are an accessible tablist; they auto-rotate slowly (src/scripts/ide.ts)
+ * and stop rotating as soon as the visitor interacts.
+ */
+import { Icon } from 'astro-icon/components';
+import type { FlowStep, Locale, Text } from '../../data/types';
+import { profile } from '../../data/profile';
+import { certifications } from '../../data/certifications';
+import { siteConfig } from '../../data/site.config';
+import { tr, useUi } from '../../lib/i18n';
+import FlowDiagram from '../ui/FlowDiagram.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const ui = useUi(locale);
+
+/* ---------- build the code lines from data ---------- */
+type Tok = [cls: string, text: string];
+const s = (v: string): Tok => ['syn-str', `"${v}"`];
+const p = (v: string): Tok => ['syn-punc', v];
+const k = (v: string): Tok => ['syn-kw', v];
+const prop = (v: string): Tok => ['syn-prop', v];
+const ind = (n = 1): Tok => ['', '  '.repeat(n)];
+
+// Code is always shown in English (it is code), regardless of page language.
+const en = (t: Text) => tr(t, 'en');
+const [role, focus] = en(profile.headline).split('|').map((x) => x.trim());
+const certCodes = certifications
+  .filter((c) => c.featured)
+  .map((c) => en(c.title).match(/\(([A-Z0-9]+)\)/)?.[1])
+  .filter((x): x is string => !!x);
+
+/** Marker token: the line is hidden on phones (simplified mobile view, long lines). */
+const MOBILE_HIDE: Tok = ['@mobile-hide', ''];
+
+function list(items: string[]): Tok[] {
+  return [p('['), ...items.flatMap((v, i) => [s(v), ...(i < items.length - 1 ? [p(', ')] : [])]), p(']')];
+}
+function chunk<T>(arr: T[], size: number): T[][] {
+  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size));
+}
+
+const lines: Tok[][] = [
+  [['syn-com', '// profile.ts']],
+  [k('export const '), ['syn-fn', 'profile'], p(' = {')],
+  [ind(), prop('name'), p(': '), s(en(profile.name)), p(',')],
+  ...(role ? [[ind(), prop('role'), p(': '), s(role), p(',')]] : []),
+  ...(focus ? [[MOBILE_HIDE, ind(), prop('focus'), p(': '), s(focus), p(',')]] : []),
+  [ind(), prop('location'), p(': '), s(en(profile.location)), p(',')],
+  [ind(), prop('stack'), p(': [')],
+  ...chunk(profile.heroStack, 3).map((group) => [
+    ind(2),
+    ...group.flatMap((v, i) => [s(v), p(i < group.length - 1 ? ', ' : ',')]),
+  ]),
+  [ind(), p('],')],
+  ...(certCodes.length ? [[ind(), prop('certified'), p(': '), ...list(certCodes), p(',')]] : []),
+  [MOBILE_HIDE, ind(), prop('languages'), p(': '), ...list(profile.languages.map((l) => en(l.name))), p(',')],
+  [ind(), prop('openToWork'), p(': '), ['syn-num', String(siteConfig.availableForWork)], p(',')],
+  [p('} '), k('as const'), p(';')],
+];
+
+const flowSteps: FlowStep[] = [
+  { label: ui.hero.flow.trigger, icon: 'lucide:zap', kind: 'trigger' },
+  { label: ui.hero.flow.queue, icon: 'lucide:list-ordered', kind: 'queue' },
+  { label: ui.hero.flow.process, icon: 'lucide:cog', kind: 'process' },
+  { label: ui.hero.flow.validate, icon: 'lucide:shield-check', kind: 'process' },
+  { label: ui.hero.flow.done, icon: 'lucide:circle-check', kind: 'done' },
+];
+const flowStatuses = ['listening', 'queued', 'running', 'passed', 'complete'];
+
+const tabs = [
+  { id: 'profile', file: 'profile.ts', icon: 'simple-icons:typescript', color: 'text-syn-prop' },
+  { id: 'workflow', file: 'workflow.bp', icon: 'lucide:workflow', color: 'text-accent' },
+] as const;
+---
+<div class="ide card relative overflow-hidden" data-ide role="region" aria-label={ui.hero.ideLabel} dir="ltr">
+  <!-- title bar -->
+  <div class="flex items-center gap-3 border-b border-line bg-surface-2/60 px-4 py-2.5">
+    <div class="flex gap-1.5" aria-hidden="true">
+      <span class="size-3 rounded-full bg-[#ff5f57]"></span>
+      <span class="size-3 rounded-full bg-[#febc2e]"></span>
+      <span class="size-3 rounded-full bg-[#28c840]"></span>
+    </div>
+    <span class="hidden truncate font-mono text-xs text-subtle sm:block">~/portfolio/src</span>
+  </div>
+
+  <!-- tabs -->
+  <div class="flex border-b border-line bg-surface-2/30" role="tablist" aria-label={ui.hero.ideLabel}>
+    {tabs.map((t, i) => (
+      <button
+        type="button"
+        role="tab"
+        id={`ide-tab-${t.id}`}
+        aria-controls={`ide-panel-${t.id}`}
+        aria-selected={i === 0 ? 'true' : 'false'}
+        tabindex={i === 0 ? 0 : -1}
+        data-ide-tab={t.id}
+        class="ide-tab relative inline-flex min-h-11 items-center gap-2 border-e border-line px-4 font-mono text-xs text-muted transition-colors hover:text-fg"
+      >
+        <Icon name={t.icon} class:list={['size-3.5', t.color]} aria-hidden="true" />
+        {t.file}
+      </button>
+    ))}
+  </div>
+
+  <!-- panels share one grid cell, so switching tabs never changes the height (no layout shift) -->
+  <div class="grid">
+    <div
+      id="ide-panel-profile"
+      role="tabpanel"
+      aria-labelledby="ide-tab-profile"
+      data-ide-panel="profile"
+      class="ide-panel col-start-1 row-start-1 overflow-x-auto"
+      tabindex="0"
+    >
+      <pre class="ide-code m-0 py-4 font-mono text-[12px] leading-[1.75] sm:text-[13px]"><code>{lines.map((line, i) => (
+        <span class:list={['code-line', line[0]?.[0] === '@mobile-hide' && 'max-sm:hidden']} style={`--i:${i}`}><span class="ln" aria-hidden="true">{i + 1}</span>{line.filter(([cls]) => cls !== '@mobile-hide').map(([cls, text]) => cls ? <span class={cls}>{text}</span> : text)}{i === lines.length - 1 && <span class="caret" aria-hidden="true"></span>}</span>
+      ))}</code></pre>
+    </div>
+
+    <div
+      id="ide-panel-workflow"
+      role="tabpanel"
+      aria-labelledby="ide-tab-workflow"
+      data-ide-panel="workflow"
+      class="ide-panel col-start-1 row-start-1 flex flex-col justify-center px-5 py-5 sm:px-7"
+      tabindex="0"
+      data-inactive
+      inert
+    >
+      <p class="mb-4 font-mono text-xs text-syn-com">// process: work-queue → validate → done</p>
+      <FlowDiagram steps={flowSteps} statuses={flowStatuses} orientation="vertical" locale={locale} />
+    </div>
+  </div>
+</div>
+
+<script>
+  import '../../scripts/ide';
+</script>
+
+<style>
+  .ide {
+    background: color-mix(in oklab, var(--surface) 90%, transparent);
+  }
+  .ide-tab[aria-selected='true'] {
+    color: var(--text);
+    background: var(--surface);
+  }
+  .ide-tab[aria-selected='true']::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--grad-from), var(--grad-to));
+  }
+  .ide-panel {
+    transition: opacity 0.35s ease;
+  }
+  .ide-panel[data-inactive] {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .code-line {
+    display: block;
+    padding-inline-end: 1.25rem;
+    white-space: pre;
+    color: var(--text);
+  }
+  .ln {
+    display: inline-block;
+    width: 2.75rem;
+    padding-inline-end: 1rem;
+    text-align: right;
+    color: var(--subtle);
+    opacity: 0.6;
+    user-select: none;
+  }
+  @media (max-width: 639px) {
+    .ln {
+      width: 1rem;
+      padding: 0;
+      visibility: hidden;
+    }
+  }
+
+  .syn-kw { color: var(--syn-kw); }
+  .syn-str { color: var(--syn-str); }
+  .syn-num { color: var(--syn-num); }
+  .syn-prop { color: var(--syn-prop); }
+  .syn-fn { color: var(--syn-fn); }
+  .syn-com { color: var(--syn-com); font-style: italic; }
+  .syn-punc { color: var(--syn-punc); }
+
+  .caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.1em;
+    margin-inline-start: 2px;
+    vertical-align: -0.2em;
+    background: var(--accent);
+    animation: blink 1.1s steps(1) infinite;
+  }
+
+  /* typed-out effect: each line is revealed left→right, one after another */
+  :global(.js) .code-line {
+    clip-path: inset(0 100% 0 0);
+    animation: type-line 0.45s steps(24, end) forwards;
+    animation-delay: calc(0.35s + var(--i) * 0.16s);
+  }
+  @keyframes type-line {
+    to { clip-path: inset(0 0 0 0); }
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .code-line {
+      animation: none;
+      clip-path: none;
+    }
+    .caret { animation: none; }
+  }
+</style>

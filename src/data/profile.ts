@@ -35,6 +35,7 @@ export const profile: Profile = {
     en: 'RPA Developer @ Cyborg Automation Hub',
     ar: 'مطوّر RPA في Cyborg Automation Hub',
   },
+  heroStack: ['Blue Prism', 'C#', '.NET', 'React', 'SQL Server'],
   currentlyWorkingOn: [
     {
       en: 'Aura Neurology: final testing before production launch',

@@ -1,0 +1,79 @@
+---
+/**
+ * Base HTML shell: <head>, theme bootstrap, fonts, background, global scripts.
+ * Full SEO (Open Graph, JSON-LD, hreflang) is completed in Phase 4.
+ */
+import '../styles/global.css';
+// Relative paths: the font packages' "exports" map only exposes .css files.
+// Vite emits these once (same file as the @font-face in global.css), so preload + CSS share one URL.
+import interLatin from '../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import monoLatin from '../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
+import type { Locale } from '../data/types';
+import { localeMeta } from '../data/i18n';
+import { siteConfig } from '../data/site.config';
+import { useUi } from '../lib/i18n';
+import { hasPublicFile } from '../lib/images';
+
+interface Props {
+  locale: Locale;
+  title?: string;
+  description?: string;
+}
+
+const { locale, title, description } = Astro.props;
+const ui = useUi(locale);
+const meta = localeMeta[locale];
+const pageTitle = title ?? ui.meta.title;
+const pageDescription = description ?? ui.meta.description;
+
+if (!hasPublicFile(siteConfig.cv.path)) {
+  console.warn(`[portfolio] CV not found at public${siteConfig.cv.path}. Download CV buttons will 404 until you add it.`);
+}
+---
+<!doctype html>
+<html lang={meta.htmlLang} dir={meta.dir} data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0b0f17" />
+
+    <!-- Theme bootstrap: runs before paint to avoid a flash. Saved choice → system preference → dark. -->
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        d.dataset.theme = t;
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'light' ? '#f6f8fb' : '#0b0f17');
+      })();
+    </script>
+
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={monoLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <slot name="head" />
+  </head>
+  <body>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-surface focus:px-4 focus:py-3 focus:text-fg focus:shadow-lg"
+    >
+      {ui.a11y.skipToContent}
+    </a>
+    <div class="bg-dots" aria-hidden="true"></div>
+    <slot />
+
+    <script>
+      import '../scripts/reveal';
+      import '../scripts/spotlight';
+    </script>
+  </body>
+</html>

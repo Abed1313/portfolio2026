@@ -1,0 +1,18 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { Locale } from '../../data/types';
+import { useUi } from '../../lib/i18n';
+
+interface Props {
+  locale: Locale;
+}
+const ui = useUi(Astro.props.locale);
+---
+<button type="button" class="icon-btn" data-theme-toggle aria-label={ui.a11y.toggleTheme} title={ui.a11y.toggleTheme}>
+  <Icon name="lucide:moon" class="size-5 dark:hidden" aria-hidden="true" />
+  <Icon name="lucide:sun" class="hidden size-5 dark:block" aria-hidden="true" />
+</button>
+
+<script>
+  import '../../scripts/theme';
+</script>

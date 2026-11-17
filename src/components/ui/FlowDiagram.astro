@@ -1,0 +1,200 @@
+---
+/**
+ * Animated automation flow (pure CSS, no JS).
+ * - vertical:   used in the hero `workflow.bp` tab (label + status per step)
+ * - horizontal: compact version for RPA project cards
+ * Animation loop assumes 5 steps (1s per step); fewer/more steps still render, just with gaps.
+ * Disabled automatically under prefers-reduced-motion.
+ */
+import { Icon } from 'astro-icon/components';
+import type { FlowStep, Locale } from '../../data/types';
+import { tr } from '../../lib/i18n';
+
+interface Props {
+  steps: FlowStep[];
+  locale: Locale;
+  orientation?: 'vertical' | 'horizontal';
+  /** Optional right-hand status text per step (vertical only). */
+  statuses?: string[];
+  class?: string;
+}
+
+const { steps, locale, orientation = 'horizontal', statuses = [], class: className = '' } = Astro.props;
+
+const kindColor: Record<NonNullable<FlowStep['kind']>, string> = {
+  trigger: 'text-accent-2',
+  queue: 'text-violet',
+  process: 'text-accent',
+  exception: 'text-warning',
+  notify: 'text-violet',
+  done: 'text-success',
+};
+---
+{orientation === 'vertical' ? (
+  <ol class:list={['flow flow-v', className]} dir="ltr">
+    {steps.map((step, i) => (
+      <li class="flow-row" style={`--s:${i}`}>
+        <span class:list={['flow-node', kindColor[step.kind ?? 'process']]}>
+          <Icon name={step.icon} class="size-4.5" aria-hidden="true" />
+        </span>
+        <span class="min-w-0 flex-1 truncate text-sm font-medium text-fg" dir="auto">{tr(step.label, locale)}</span>
+        {statuses[i] && <span class="flow-status font-mono text-xs">{statuses[i]}</span>}
+        {i < steps.length - 1 && (
+          <span class="flow-link-v" aria-hidden="true"><span class="flow-packet"></span></span>
+        )}
+      </li>
+    ))}
+  </ol>
+) : (
+  <ol class:list={['flow flow-h', className]}>
+    {steps.map((step, i) => (
+      <>
+        <li class="flow-step" style={`--s:${i}`}>
+          <span class:list={['flow-node', kindColor[step.kind ?? 'process']]}>
+            <Icon name={step.icon} class="size-4" aria-hidden="true" />
+          </span>
+          <span class="flow-label">{tr(step.label, locale)}</span>
+        </li>
+        {i < steps.length - 1 && (
+          <li class="flow-link-h" aria-hidden="true" style={`--s:${i}`}><span class="flow-packet"></span></li>
+        )}
+      </>
+    ))}
+  </ol>
+)}
+
+<style>
+  .flow {
+    --cycle: 5s;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .flow-node {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.65rem;
+    border: 1px solid var(--border-strong);
+    background: var(--surface-2);
+    animation: node-active var(--cycle) ease-in-out infinite;
+    animation-delay: calc(var(--s) * 1s);
+  }
+
+  /* ---------- vertical ---------- */
+  .flow-v {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+  .flow-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  .flow-status {
+    color: var(--subtle);
+    animation: status-active var(--cycle) ease-in-out infinite;
+    animation-delay: calc(var(--s) * 1s);
+  }
+  .flow-link-v {
+    position: absolute;
+    left: calc(1.125rem - 1px);
+    top: 2.25rem;
+    height: 1.1rem;
+    width: 2px;
+    background: repeating-linear-gradient(to bottom, var(--border-strong) 0 3px, transparent 3px 6px);
+  }
+  .flow-link-v .flow-packet {
+    left: -2px;
+    animation-name: packet-v;
+  }
+
+  /* ---------- horizontal ---------- */
+  .flow-h {
+    display: flex;
+    align-items: flex-start;
+  }
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    width: 3.6rem;
+    flex: none;
+  }
+  .flow-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    line-height: 1.25;
+    color: var(--muted);
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  .flow-link-h {
+    position: relative;
+    flex: 1;
+    min-width: 0.5rem;
+    height: 2px;
+    margin-top: calc(1.125rem - 1px);
+    margin-inline: -0.6rem;
+    background: repeating-linear-gradient(to right, var(--border-strong) 0 3px, transparent 3px 6px);
+  }
+  .flow-link-h .flow-packet {
+    top: -2px;
+    animation-name: packet-h;
+  }
+
+  .flow-packet {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--accent-2);
+    box-shadow: 0 0 10px var(--accent-2);
+    opacity: 0;
+    animation-duration: var(--cycle);
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+    animation-delay: calc(var(--s) * 1s);
+  }
+
+  @keyframes node-active {
+    0%, 22%, 100% {
+      border-color: var(--border-strong);
+      box-shadow: none;
+    }
+    6%, 16% {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 16%, transparent);
+    }
+  }
+  @keyframes status-active {
+    0%, 22%, 100% { color: var(--subtle); }
+    6%, 16% { color: var(--accent); }
+  }
+  @keyframes packet-v {
+    0%, 8% { top: 0; opacity: 0; }
+    10% { opacity: 1; }
+    19% { opacity: 1; }
+    21%, 100% { top: calc(100% - 6px); opacity: 0; }
+  }
+  @keyframes packet-h {
+    0%, 8% { inset-inline-start: 0; opacity: 0; }
+    10% { opacity: 1; }
+    19% { opacity: 1; }
+    21%, 100% { inset-inline-start: calc(100% - 6px); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flow-node,
+    .flow-status,
+    .flow-packet {
+      animation: none !important;
+    }
+  }
+</style>

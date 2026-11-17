@@ -1,0 +1,24 @@
+---
+import type { Locale } from '../../data/types';
+import { sections, sectionNumber, type SectionId } from '../../data/sections';
+import { useUi } from '../../lib/i18n';
+
+interface Props {
+  id: SectionId;
+  locale: Locale;
+  /** Optional intro paragraph under the title. */
+  intro?: string;
+}
+
+const { id, locale, intro } = Astro.props;
+const ui = useUi(locale);
+const code = sections.find((s) => s.id === id)?.code ?? '';
+const title = ui.sections[id].title;
+---
+<header class="reveal mb-10 md:mb-14">
+  <p class="font-mono text-sm text-accent">
+    <bdi dir="ltr"><span class="text-subtle">{sectionNumber(id)}.</span> {code}</bdi>
+  </p>
+  <h2 id={`${id}-title`} class="text-h2 mt-2 font-bold text-fg">{title}</h2>
+  {intro && <p class="text-lead prose-width mt-4 text-muted">{intro}</p>}
+</header>

@@ -1,0 +1,83 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { Locale } from '../../data/types';
+import { profile } from '../../data/profile';
+import { siteConfig } from '../../data/site.config';
+import { tr, useUi } from '../../lib/i18n';
+import CvButton from '../ui/CvButton.astro';
+import SocialLinks from '../ui/SocialLinks.astro';
+import IdeWindow from '../hero/IdeWindow.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const ui = useUi(locale);
+
+/* Split "RPA Developer | Software & Automation Engineer" → gradient on the first part. */
+const [titleLead, titleRest] = tr(profile.headline, locale).split('|').map((x) => x.trim());
+---
+<section id="top" tabindex="-1" class="relative isolate overflow-hidden pt-28 pb-4 outline-none sm:pt-32 md:pb-8 lg:pt-40" aria-labelledby="hero-title">
+  <div class="hero-glow" aria-hidden="true"></div>
+
+  <div class="container-page grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-14">
+    <!-- text (not animated: it holds the LCP element, so it paints immediately) -->
+    <div class="min-w-0">
+      <p class="font-mono text-sm text-accent sm:text-base">
+        <bdi>{ui.hero.greeting}</bdi>
+      </p>
+
+      <h1 id="hero-title" class="text-display mt-3 font-extrabold text-fg">
+        {/* non-breaking hyphen: never wrap "Al-" away from "Rahman" */}
+        {tr(profile.name, locale).replaceAll('-', '‑')}
+      </h1>
+
+      <p class="text-h3 mt-4 font-semibold">
+        <span class="text-gradient">{titleLead}</span>
+        {titleRest && (
+          <>
+            <span class="mx-1.5 text-subtle" aria-hidden="true">|</span>
+            <span class="text-fg">{titleRest}</span>
+          </>
+        )}
+      </p>
+
+      <p class="text-lead prose-width mt-5 text-muted">{tr(profile.valueStatement, locale)}</p>
+
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        {siteConfig.availableForWork && (
+          <span class="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-3 py-1 text-sm font-medium text-success">
+            <span class="status-dot" aria-hidden="true"></span>
+            {ui.hero.available}
+          </span>
+        )}
+        <span class="inline-flex items-center gap-1.5 text-sm text-muted">
+          <Icon name="lucide:map-pin" class="size-4" aria-hidden="true" />
+          {tr(profile.location, locale)}
+        </span>
+      </div>
+
+      <div class="mt-8 flex flex-wrap items-center gap-3">
+        <CvButton locale={locale} />
+        <a href="#contact" class="btn btn-secondary">
+          <Icon name="lucide:send" class="size-4.5 rtl:-scale-x-100" aria-hidden="true" />
+          {ui.actions.contactMe}
+        </a>
+        <SocialLinks locale={locale} class="ms-1" />
+      </div>
+    </div>
+
+    <!-- IDE window -->
+    <div class="hero-in min-w-0" style="--d: 120ms">
+      <IdeWindow locale={locale} />
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Above-the-fold entrance: CSS only, short, no loader. */
+  .hero-in {
+    animation: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: var(--d, 0ms);
+  }
+</style>

@@ -1,0 +1,34 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { Locale } from '../../data/types';
+import { siteConfig } from '../../data/site.config';
+import { useUi } from '../../lib/i18n';
+
+interface Props {
+  locale: Locale;
+  variant?: 'primary' | 'secondary';
+  /** "responsive" shows "CV" on small screens and "Download CV" from sm up. */
+  label?: 'full' | 'responsive';
+  class?: string;
+}
+
+const { locale, variant = 'primary', label = 'full', class: className = '' } = Astro.props;
+const ui = useUi(locale);
+---
+<a
+  href={siteConfig.cv.path}
+  download={siteConfig.cv.fileName}
+  class:list={['btn', variant === 'primary' ? 'btn-primary' : 'btn-secondary', className]}
+  aria-label={label === 'responsive' ? ui.actions.downloadCv : undefined}
+  data-cv-link
+>
+  <Icon name="lucide:download" class="size-4.5" aria-hidden="true" />
+  {label === 'full' ? (
+    <span>{ui.actions.downloadCv}</span>
+  ) : (
+    <>
+      <span class="sm:hidden" aria-hidden="true">{ui.actions.cvShort}</span>
+      <span class="hidden sm:inline" aria-hidden="true">{ui.actions.downloadCv}</span>
+    </>
+  )}
+</a>

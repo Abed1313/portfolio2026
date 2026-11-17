@@ -38,6 +38,7 @@ export const en = {
   },
   actions: {
     downloadCv: 'Download CV',
+    cvShort: 'CV',
     contactMe: 'Contact Me',
     copyEmail: 'Copy email',
     emailCopied: 'Email copied to clipboard',
@@ -54,6 +55,15 @@ export const en = {
   hero: {
     greeting: "> hello world, I'm",
     available: 'Open to opportunities',
+    socialLabel: 'Social links',
+    ideLabel: 'Code editor preview',
+    flow: {
+      trigger: 'Trigger',
+      queue: 'Work Queue',
+      process: 'Process',
+      validate: 'Validate',
+      done: 'Done',
+    },
   },
   sections: {
     about: { label: 'about', title: 'About me' },
