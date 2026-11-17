@@ -136,6 +136,9 @@ export const ar: UiStrings = {
       message: 'يرجى كتابة رسالة (10–5000 حرف).',
     },
     orEmail: 'أو راسلني مباشرة',
+    phone: 'الهاتف',
+    call: 'اتصال',
+    whatsapp: 'واتساب',
     findMe: 'تجدني على',
   },
   footer: {

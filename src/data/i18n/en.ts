@@ -136,6 +136,9 @@ export const en = {
       message: 'Please write a message (10–5000 characters).',
     },
     orEmail: 'Or email me directly',
+    phone: 'Phone',
+    call: 'Call',
+    whatsapp: 'WhatsApp',
     findMe: 'Find me on',
   },
   footer: {

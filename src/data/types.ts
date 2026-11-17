@@ -44,6 +44,11 @@ export interface Profile {
   valueStatement: Text;
   location: Text;
   email: string;
+  /**
+   * Phone in international format, digits only after "+" (e.g. "+962791234567").
+   * Shown ONLY in the Contact section (call + WhatsApp buttons). Remove/empty to hide.
+   */
+  phone?: string;
   summary: Text;
   languages: SpokenLanguage[];
   currentRole: Text;

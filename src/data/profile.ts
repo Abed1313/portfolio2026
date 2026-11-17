@@ -3,7 +3,8 @@ import type { Profile } from './types';
 /**
  * Personal profile.
  * Social links + the "availableForWork" flag live in src/data/site.config.ts.
- * The phone number is intentionally NOT stored anywhere in this project.
+ * The phone number is shown ONLY in the Contact section (call + WhatsApp).
+ * Set it to '' to hide it everywhere.
  */
 export const profile: Profile = {
   name: { en: 'Abed Al-Rahman Radwan', ar: 'عبد الرحمن رضوان' },
@@ -22,6 +23,7 @@ export const profile: Profile = {
   },
   location: { en: 'Amman, Jordan', ar: 'عمّان، الأردن' },
   email: 'abedalrahmanradwanaar@gmail.com',
+  phone: '+962796026511',
   summary: {
     en: 'Blue Prism RPA developer and support engineer experienced in enhancing and troubleshooting business-process automations, testing workflow changes, and diagnosing exceptions across enterprise applications. I bring a .NET full-stack development background and hands-on experience with Excel/Outlook automation, input validation, root-cause analysis, and technical communication with business stakeholders.',
     ar: 'مطوّر ومهندس دعم في Blue Prism RPA، لديّ خبرة في تحسين أتمتة العمليات التجارية ومعالجة أعطالها، واختبار التعديلات على مسارات العمل، وتشخيص الاستثناءات عبر تطبيقات المؤسسات. أمتلك خلفية في التطوير المتكامل بتقنية ‎.NET، وخبرة عملية في أتمتة Excel وOutlook، والتحقق من صحة المدخلات، وتحليل الأسباب الجذرية، والتواصل التقني مع أصحاب العلاقة في الأعمال.',
