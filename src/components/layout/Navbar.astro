@@ -6,13 +6,18 @@ import { profile } from '../../data/profile';
 import { useUi, homePath } from '../../lib/i18n';
 import CvButton from '../ui/CvButton.astro';
 import ThemeToggle from './ThemeToggle.astro';
+import LangSwitch from './LangSwitch.astro';
 
 interface Props {
   locale: Locale;
+  /** Command palette + terminal buttons (only where those overlays exist). */
+  tools?: boolean;
 }
 
-const { locale } = Astro.props;
+const { locale, tools = true } = Astro.props;
 const ui = useUi(locale);
+/* Absolute "/#id" links so the navbar also works from other pages (e.g. 404). */
+const home = homePath(locale);
 const links = sections.map((s) => ({ ...s, label: ui.nav[s.id] }));
 ---
 <header class="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">
@@ -22,7 +27,7 @@ const links = sections.map((s) => ({ ...s, label: ui.nav[s.id] }));
   >
     <a
       href={`${homePath(locale)}#top`}
-      class="me-auto inline-flex min-h-11 items-center rounded-full px-2 font-mono text-[0.95rem] font-bold tracking-tight text-fg"
+      class="me-auto inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full px-2 font-mono text-[0.95rem] font-bold tracking-tight text-fg"
       aria-label={`${profile.initials}, ${ui.a11y.backToTop}`}
     >
       <bdi dir="ltr"><span class="text-accent">&lt;</span>{profile.initials}<span class="text-accent"> /&gt;</span></bdi>
@@ -30,9 +35,9 @@ const links = sections.map((s) => ({ ...s, label: ui.nav[s.id] }));
 
     <ul class="hidden items-center gap-0.5 lg:flex">
       {links.map((l) => (
-        <li class:list={[l.nav === 'xl' && 'hidden xl:block']}>
+        <li class:list={[l.nav === 'xl' && 'hidden 2xl:block']}>
           <a
-            href={`#${l.id}`}
+            href={`${home}#${l.id}`}
             data-nav-link={l.id}
             class="nav-link inline-flex min-h-11 items-center rounded-full px-3 text-sm font-medium text-muted transition-colors hover:text-fg"
           >
@@ -43,6 +48,20 @@ const links = sections.map((s) => ({ ...s, label: ui.nav[s.id] }));
     </ul>
 
     <div class="flex items-center gap-1 ps-1">
+      {tools && (
+        <button
+          type="button"
+          class="hidden min-h-11 items-center gap-2 rounded-full border border-line px-3 text-xs text-muted transition-colors hover:border-line-strong hover:text-fg lg:inline-flex"
+          data-palette-open
+          aria-label={ui.a11y.openCommandPalette}
+          aria-haspopup="dialog"
+          aria-keyshortcuts="Control+K Meta+K"
+        >
+          <Icon name="lucide:search" class="size-4" aria-hidden="true" />
+          <kbd class="whitespace-nowrap font-mono" data-kbd-hint>Ctrl K</kbd>
+        </button>
+      )}
+      <span class="hidden sm:contents"><LangSwitch locale={locale} /></span>
       <ThemeToggle locale={locale} />
       <CvButton locale={locale} label="responsive" class="!rounded-full !px-4" />
       <button
@@ -74,7 +93,7 @@ const links = sections.map((s) => ({ ...s, label: ui.nav[s.id] }));
       {links.map((l) => (
         <li>
           <a
-            href={`#${l.id}`}
+            href={`${home}#${l.id}`}
             data-nav-link={l.id}
             data-menu-link
             class="nav-link flex min-h-12 items-center gap-3 rounded-xl px-3 text-base font-medium text-muted hover:bg-surface-2 hover:text-fg"
@@ -86,6 +105,19 @@ const links = sections.map((s) => ({ ...s, label: ui.nav[s.id] }));
       ))}
     </ul>
     <div class="grid gap-3 border-t border-line p-5">
+      {tools && (
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" class="btn btn-secondary" data-palette-open data-menu-action aria-haspopup="dialog">
+            <Icon name="lucide:search" class="size-4" aria-hidden="true" />
+            <span class="truncate">{ui.palette.title}</span>
+          </button>
+          <button type="button" class="btn btn-secondary" data-terminal-open data-menu-action aria-haspopup="dialog">
+            <Icon name="lucide:square-terminal" class="size-4" aria-hidden="true" />
+            <span class="truncate">{ui.terminal.short}</span>
+          </button>
+        </div>
+      )}
+      <LangSwitch locale={locale} variant="full" />
       <CvButton locale={locale} class="w-full" />
     </div>
   </div>

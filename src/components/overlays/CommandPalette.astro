@@ -1,0 +1,150 @@
+---
+/**
+ * Command palette (Ctrl+K / ⌘K, or the visible search button).
+ * Options are rendered server-side; src/scripts/palette.ts filters and runs them.
+ */
+import { Icon } from 'astro-icon/components';
+import type { IconName, Locale } from '../../data/types';
+import { sections } from '../../data/sections';
+import { profile } from '../../data/profile';
+import { siteConfig } from '../../data/site.config';
+import { homePath, otherLocale, useUi } from '../../lib/i18n';
+import { isSet } from '../../lib/links';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const ui = useUi(locale);
+const p = ui.palette;
+
+interface Item {
+  id: string;
+  label: string;
+  icon: IconName;
+  /** goto:#id | theme | lang:<href> | cv | copy-email | terminal | open:<url> | mail */
+  run: string;
+  keywords?: string;
+  hint?: string;
+}
+
+const sectionIcons: Record<string, IconName> = {
+  about: 'lucide:user',
+  skills: 'lucide:code-xml',
+  experience: 'lucide:git-commit-horizontal',
+  projects: 'lucide:folder-git-2',
+  certifications: 'lucide:award',
+  education: 'lucide:graduation-cap',
+  volunteering: 'lucide:hand-heart',
+  contact: 'lucide:mail',
+};
+
+const groups: { label: string; items: Item[] }[] = [
+  {
+    label: p.groupNavigate,
+    items: sections.map((s) => ({
+      id: `nav-${s.id}`,
+      label: `${p.goTo}: ${ui.nav[s.id]}`,
+      icon: sectionIcons[s.id] ?? 'lucide:hash',
+      run: `goto:#${s.id}`,
+      keywords: `${s.id} ${s.code} ${ui.nav[s.id]}`,
+    })),
+  },
+  {
+    label: p.groupActions,
+    items: [
+      { id: 'act-cv', label: p.downloadCv, icon: 'lucide:download', run: 'cv', keywords: 'cv resume pdf download سيرة' },
+      { id: 'act-copy', label: p.copyEmail, icon: 'lucide:copy', run: 'copy-email', keywords: `email copy ${profile.email} بريد`, hint: profile.email },
+      { id: 'act-theme', label: p.toggleTheme, icon: 'lucide:sun-moon', run: 'theme', keywords: 'theme dark light mode وضع' },
+      { id: 'act-lang', label: p.switchLanguage, icon: 'lucide:languages', run: `lang:${homePath(otherLocale(locale))}`, keywords: 'language arabic english rtl لغة عربي' },
+      { id: 'act-term', label: p.openTerminal, icon: 'lucide:square-terminal', run: 'terminal', keywords: 'terminal shell console cli طرفية' },
+    ],
+  },
+  {
+    label: p.groupLinks,
+    items: [
+      ...(isSet(siteConfig.social.github)
+        ? [{ id: 'link-gh', label: 'GitHub', icon: 'simple-icons:github' as IconName, run: `open:${siteConfig.social.github}`, keywords: 'github code repos' }]
+        : []),
+      ...(isSet(siteConfig.social.linkedin)
+        ? [{ id: 'link-li', label: 'LinkedIn', icon: 'simple-icons:linkedin' as IconName, run: `open:${siteConfig.social.linkedin}`, keywords: 'linkedin profile' }]
+        : []),
+      { id: 'link-mail', label: p.sendEmail, icon: 'lucide:mail', run: `open:mailto:${profile.email}`, keywords: 'email mail بريد' },
+    ],
+  },
+];
+---
+<dialog id="command-palette" class="modal palette" aria-label={p.label} data-msg-copied={ui.actions.emailCopied} data-msg-copy-failed={ui.actions.copyFailed} data-email={profile.email}>
+  <div class="flex h-full max-h-[inherit] flex-col">
+    <div class="flex items-center gap-3 border-b border-line px-4">
+      <Icon name="lucide:search" class="size-5 shrink-0 text-subtle" aria-hidden="true" />
+      <input
+        type="text"
+        class="palette-input min-h-14 flex-1 bg-transparent text-base text-fg outline-none placeholder:text-subtle"
+        placeholder={p.placeholder}
+        role="combobox"
+        aria-expanded="true"
+        aria-controls="palette-list"
+        aria-autocomplete="list"
+        aria-label={p.label}
+        autocomplete="off"
+        spellcheck="false"
+        data-palette-input
+      />
+      <button type="button" class="icon-btn -me-2" data-dialog-close aria-label={ui.a11y.close}>
+        <Icon name="lucide:x" class="size-5" aria-hidden="true" />
+      </button>
+    </div>
+
+    <ul id="palette-list" role="listbox" aria-label={p.label} class="flex-1 overflow-y-auto p-2" data-palette-list>
+      {groups.filter((g) => g.items.length).map((g) => (
+        <li role="presentation" data-palette-group>
+          <p class="px-3 pt-3 pb-1.5 font-mono text-xs text-subtle" aria-hidden="true">{g.label}</p>
+          <ul role="group" aria-label={g.label}>
+            {g.items.map((item) => (
+              <li
+                id={`pal-${item.id}`}
+                role="option"
+                aria-selected="false"
+                class="palette-option flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 text-fg"
+                data-run={item.run}
+                data-search={`${item.label} ${item.keywords ?? ''}`.toLowerCase()}
+              >
+                <Icon name={item.icon} class="size-4.5 shrink-0 text-muted" aria-hidden="true" />
+                <span class="min-w-0 flex-1 truncate">{item.label}</span>
+                {item.hint && <span class="hidden truncate font-mono text-xs text-subtle sm:inline" dir="ltr">{item.hint}</span>}
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
+    <p class="px-4 py-6 text-center text-muted" data-palette-empty hidden>{p.noResults}</p>
+
+    <footer class="hidden border-t border-line px-4 py-2.5 font-mono text-xs text-subtle sm:block">{p.hint}</footer>
+  </div>
+</dialog>
+
+<script>
+  import '../../scripts/palette';
+</script>
+
+<style>
+  @media (min-width: 768px) {
+    dialog.palette {
+      width: min(38rem, calc(100vw - 3rem));
+      margin-top: 12vh;
+      max-height: min(70dvh, 34rem);
+    }
+  }
+  .palette-option[aria-selected='true'] {
+    background: color-mix(in oklab, var(--accent) 13%, transparent);
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+  :global([dir='rtl']) .palette-option[aria-selected='true'] {
+    box-shadow: inset -2px 0 0 var(--accent);
+  }
+  .palette-option[aria-selected='true'] :global(svg) {
+    color: var(--accent);
+  }
+</style>

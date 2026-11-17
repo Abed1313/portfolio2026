@@ -13,6 +13,9 @@ import Projects from './sections/Projects.astro';
 import Certifications from './sections/Certifications.astro';
 import Education from './sections/Education.astro';
 import Volunteering from './sections/Volunteering.astro';
+import Contact from './sections/Contact.astro';
+import CommandPalette from './overlays/CommandPalette.astro';
+import Terminal from './overlays/Terminal.astro';
 
 interface Props {
   locale: Locale;
@@ -31,7 +34,9 @@ const { locale } = Astro.props;
     <Certifications locale={locale} />
     <Education locale={locale} />
     <Volunteering locale={locale} />
-    {/* Phase 4: Contact */}
+    <Contact locale={locale} />
   </main>
   <Footer locale={locale} />
+  <CommandPalette locale={locale} />
+  <Terminal locale={locale} />
 </BaseLayout>

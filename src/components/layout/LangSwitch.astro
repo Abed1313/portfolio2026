@@ -1,0 +1,30 @@
+---
+/** Link to the same page in the other language. Keeps the current #section (via JS). */
+import type { Locale } from '../../data/types';
+import { localeMeta } from '../../data/i18n';
+import { homePath, otherLocale, useUi } from '../../lib/i18n';
+
+interface Props {
+  locale: Locale;
+  variant?: 'icon' | 'full';
+}
+const { locale, variant = 'icon' } = Astro.props;
+const ui = useUi(locale);
+const target = otherLocale(locale);
+const targetUi = useUi(target);
+---
+<a
+  href={homePath(target)}
+  hreflang={localeMeta[target].htmlLang}
+  lang={localeMeta[target].htmlLang}
+  data-lang-switch
+  class:list={variant === 'icon' ? 'icon-btn font-semibold' : 'btn btn-secondary w-full'}
+  aria-label={`${ui.a11y.switchLanguage}: ${targetUi.meta.langName}`}
+  title={targetUi.meta.langName}
+>
+  {variant === 'icon' ? (
+    <span class:list={['text-sm', target === 'ar' ? 'font-arabic text-base' : 'font-mono']} aria-hidden="true">{localeMeta[target].label}</span>
+  ) : (
+    <span>{targetUi.meta.langName}</span>
+  )}
+</a>

@@ -31,8 +31,8 @@ const check = (name, ok, extra = '') => results.push(`${ok ? 'PASS' : 'FAIL'}  $
 
   await page.click('[data-menu-open]');
   await page.waitForTimeout(350);
-  await page.click('#mobile-menu [data-menu-link][href="#skills"]');
-  await page.waitForTimeout(900);
+  await page.click('#mobile-menu [data-menu-link][data-nav-link="skills"]');
+  await page.waitForTimeout(1800);
   check('menu link closes menu + scrolls', !(await page.$eval('#mobile-menu', (d) => d.open)) && (await page.evaluate(() => scrollY)) > 300);
   await ctx.close();
 }
@@ -67,7 +67,7 @@ const check = (name, ok, extra = '') => results.push(`${ok ? 'PASS' : 'FAIL'}  $
 
   /* ---------- section anchors all exist ---------- */
   const missing = await page.$$eval('nav [data-nav-link]', (as) =>
-    as.map((a) => a.getAttribute('href')).filter((h) => !document.querySelector(h)),
+    as.map((a) => new URL(a.href).hash).filter((h) => !h || !document.querySelector(h)),
   );
   check('every navbar link has a target section', missing.length === 0, missing.join(', '));
 
@@ -124,12 +124,121 @@ const check = (name, ok, extra = '') => results.push(`${ok ? 'PASS' : 'FAIL'}  $
   const pmp = await page.content();
   check('never says "PMP Certified"', !/PMP\s*®?\s*Certified/i.test(pmp));
 
+  /* ---------- command palette ---------- */
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.keyboard.press('Control+k');
+  await page.waitForTimeout(300);
+  check('Ctrl+K opens palette', await page.$eval('#command-palette', (d) => d.open));
+  check('palette input focused', await page.evaluate(() => document.activeElement?.matches('[data-palette-input]')));
+  await page.keyboard.type('certif');
+  const shown = await page.$$eval('#command-palette [role="option"]', (os) => os.filter((o) => !o.hidden).length);
+  check('palette filters', shown === 1, `${shown} visible`);
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(1800);
+  check('palette Enter jumps to section', await page.evaluate(() => {
+    const r = document.getElementById('certifications').getBoundingClientRect();
+    return r.top < 200 && r.bottom > 0;
+  }));
+  await page.keyboard.press('Control+k');
+  await page.waitForTimeout(200);
+  await page.keyboard.type('terminal');
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(350);
+  check('palette opens terminal', await page.$eval('#terminal', (d) => d.open));
+
+  /* ---------- terminal ---------- */
+  const term = async (cmd) => {
+    await page.fill('[data-term-input]', cmd);
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(80);
+    return page.$eval('[data-term-output]', (o) => o.textContent);
+  };
+  let outText = await term('help');
+  check('terminal help lists commands', ['about', 'skills', 'experience', 'projects', 'certs', 'cv', 'contact', 'theme', 'clear'].every((c) => outText.includes(c)));
+  outText = await term('experience');
+  check('terminal experience shows current role', outText.includes('RPA Support Engineer'));
+  outText = await term('certs');
+  check('terminal certs shows PDEV01', outText.includes('PDEV01'));
+  outText = await term('foo');
+  check('unknown command message', outText.includes('foo: command not found'));
+  const before = await page.getAttribute('html', 'data-theme');
+  await term('theme');
+  check('terminal theme toggles', (await page.getAttribute('html', 'data-theme')) !== before);
+  await term('theme');
+  await term('clear');
+  check('terminal clear', (await page.$eval('[data-term-output]', (o) => o.children.length)) === 0);
+  await page.fill('[data-term-input]', 'exp');
+  await page.keyboard.press('Tab');
+  check('terminal Tab autocomplete', (await page.inputValue('[data-term-input]')) === 'experience');
+  await page.screenshot({ path: `${out}/interaction-terminal.png` });
+  await term('exit');
+  check('terminal exit closes', !(await page.$eval('#terminal', (d) => d.open)));
+
+  /* ---------- contact form ---------- */
+  await page.evaluate(() => document.getElementById('contact').scrollIntoView());
+  await page.click('[data-contact-form] [data-submit]');
+  check('empty submit shows 3 errors', (await page.$$eval('[data-error-for]:not([hidden])', (e) => e.length)) === 3);
+  check('focus moves to first invalid field', await page.evaluate(() => document.activeElement?.id === 'cf-name'));
+  await page.fill('#cf-name', 'Test Recruiter');
+  await page.fill('#cf-email', 'recruiter@example.com');
+  await page.fill('#cf-message', 'Hello, we have an RPA role for you.');
+  check('errors clear when fixed', (await page.$$eval('[data-error-for]:not([hidden])', (e) => e.length)) === 0);
+  await page.click('[data-contact-form] [data-submit]');
+  await page.waitForTimeout(200);
+  const statusText = await page.$eval('[data-form-status]', (s) => s.textContent);
+  check('unconfigured provider → friendly message', /not configured/i.test(statusText), statusText);
+  check('phone shown in contact', (await page.$eval('#contact', (s) => s.textContent)).includes('+962 79 602 6511'));
+  check('WhatsApp link', !!(await page.$('#contact a[href="https://wa.me/962796026511"]')));
+  check('phone ONLY in contact section', await page.evaluate(() => {
+    const clone = document.body.cloneNode(true);
+    clone.querySelector('#contact')?.remove();
+    clone.querySelectorAll('script, dialog').forEach((s) => s.remove());
+    return !clone.textContent.includes('602 6511') && !clone.innerHTML.includes('796026511');
+  }));
+  await page.click('#contact [data-copy]');
+  await page.waitForTimeout(200);
+  check('copy email shows toast', ((await page.$eval('#toast-root', (t) => t.textContent)) || '').includes('copied'));
+
   // light system preference on first visit
   const ctx2 = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'light' });
   const p2 = await ctx2.newPage();
   await p2.goto(base + '/', { waitUntil: 'networkidle' });
   check('first visit respects light system preference', (await p2.getAttribute('html', 'data-theme')) === 'light');
   await ctx2.close();
+  await ctx.close();
+}
+
+/* ---------- Arabic / RTL + language switch + SEO + 404 ---------- */
+{
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'dark', permissions: [] });
+  const page = await ctx.newPage();
+  await page.goto(base + '/', { waitUntil: 'networkidle' });
+  await page.evaluate(() => document.getElementById('projects').scrollIntoView());
+  await page.waitForTimeout(1800);
+  await page.click('nav [data-lang-switch]');
+  await page.waitForLoadState('networkidle');
+  check('language switch → /ar/ keeps section', page.url().endsWith('/ar/#projects'), page.url());
+  check('Arabic page is rtl', (await page.getAttribute('html', 'dir')) === 'rtl' && (await page.getAttribute('html', 'lang')) === 'ar');
+  check('Arabic nav labels', (await page.textContent('nav')).includes('المشاريع'));
+  const ff = await page.$eval('body', (b) => getComputedStyle(b).fontFamily);
+  check('Arabic font applied', ff.includes('IBM Plex Sans Arabic'), ff);
+  const headLinks = await page.$$eval('link[rel="alternate"][hreflang]', (ls) => ls.map((l) => l.hreflang).sort().join(','));
+  check('hreflang alternates', headLinks === 'ar,en,x-default', headLinks);
+  const ld = await page.$eval('script[type="application/ld+json"]', (s) => JSON.parse(s.textContent));
+  check('JSON-LD Person', ld['@type'] === 'Person' && ld.jobTitle === 'RPA Support Engineer', ld.jobTitle);
+  check('og:image present', !!(await page.$('meta[property="og:image"]')));
+  await page.screenshot({ path: `${out}/interaction-ar-desktop.png` });
+
+  const r404 = await page.goto(base + '/this/does-not-exist', { waitUntil: 'networkidle' });
+  check('404 status', r404.status() === 404, String(r404.status()));
+  check('404 shows path', (await page.textContent('[data-path]')).includes('/this/does-not-exist'));
+  check('404 noindex', !!(await page.$('meta[name="robots"][content*="noindex"]')));
+  await page.click('main a[href="/"]');
+  await page.waitForLoadState('networkidle');
+  check('404 go home works', new URL(page.url()).pathname === '/');
+
+  const robots = await (await page.request.get(base + '/robots.txt')).text();
+  check('robots.txt has sitemap', /Sitemap: https?:\/\/.+\/sitemap-index\.xml/.test(robots));
   await ctx.close();
 }
 

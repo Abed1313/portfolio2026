@@ -1,0 +1,126 @@
+---
+/**
+ * Terminal easter egg. All output is generated from src/data (embedded as JSON),
+ * so it always matches the rest of the site. Logic lives in src/scripts/terminal.ts.
+ */
+import { Icon } from 'astro-icon/components';
+import type { Locale } from '../../data/types';
+import { profile } from '../../data/profile';
+import { skillCategories } from '../../data/skills';
+import { experience } from '../../data/experience';
+import { projects, rpaProjects } from '../../data/projects';
+import { certifications } from '../../data/certifications';
+import { siteConfig } from '../../data/site.config';
+import { tr, useUi } from '../../lib/i18n';
+import { formatPhone, isFilled, isSet } from '../../lib/links';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const ui = useUi(locale);
+const t = (x: Parameters<typeof tr>[0]) => tr(x, locale);
+
+const data = {
+  strings: ui.terminal,
+  about: {
+    name: t(profile.name),
+    headline: t(profile.headline),
+    location: t(profile.location),
+    summary: t(profile.summary),
+    languages: profile.languages.map((l) => `${t(l.name)} (${t(l.level)})`),
+  },
+  skills: skillCategories.map((c) => ({ title: t(c.title), items: c.skills.map((s) => t(s.name)) })),
+  experience: experience.map((e) => ({
+    role: t(e.role),
+    company: t(e.company),
+    dates: `${t(e.start)} ${locale === 'ar' ? '←' : '→'} ${e.current ? ui.experience.present : t(e.end)}`,
+    current: !!e.current,
+  })),
+  projects: {
+    fullStack: projects.map((p) => ({
+      title: t(p.title),
+      subtitle: t(p.subtitle),
+      url: isSet(p.githubUrl) ? p.githubUrl : isSet(p.liveUrl) ? p.liveUrl : '',
+    })),
+    rpa: rpaProjects.map((p) => t(p.title)),
+  },
+  certs: {
+    official: certifications.filter((c) => c.type === 'certification').map((c) => `${t(c.title)} · ${t(c.date)}`),
+    training: certifications
+      .filter((c) => c.type === 'training')
+      .map((c) => [t(c.title), isFilled(t(c.issuer)) ? t(c.issuer) : '', t(c.date)].filter(Boolean).join(' · ')),
+  },
+  contact: {
+    email: profile.email,
+    phone: isSet(profile.phone) ? formatPhone(profile.phone) : '',
+    github: isSet(siteConfig.social.github) ? siteConfig.social.github : '',
+    linkedin: isSet(siteConfig.social.linkedin) ? siteConfig.social.linkedin : '',
+  },
+};
+---
+<dialog id="terminal" class="modal terminal" aria-label={ui.terminal.label}>
+  <div class="flex h-full max-h-[inherit] flex-col" dir="ltr">
+    <div class="flex items-center gap-3 border-b border-white/10 px-4 py-2">
+      <div class="flex gap-1.5" aria-hidden="true">
+        <span class="size-3 rounded-full bg-[#ff5f57]"></span>
+        <span class="size-3 rounded-full bg-[#febc2e]"></span>
+        <span class="size-3 rounded-full bg-[#28c840]"></span>
+      </div>
+      <span class="flex-1 truncate font-mono text-xs text-slate-400">{ui.terminal.title}</span>
+      <button type="button" class="icon-btn -me-2 text-slate-400! hover:bg-white/5! hover:text-white!" data-dialog-close aria-label={ui.a11y.close}>
+        <Icon name="lucide:x" class="size-5" aria-hidden="true" />
+      </button>
+    </div>
+
+    <div class="term-body flex-1 overflow-y-auto px-4 py-3 font-mono text-[0.9rem] leading-relaxed" data-term-scroll>
+      <div role="log" aria-live="polite" aria-relevant="additions" data-term-output></div>
+      <form class="flex items-center gap-2" data-term-form autocomplete="off">
+        <label for="term-input" class="shrink-0 text-emerald-400">
+          <span aria-hidden="true">guest@abed:~$</span>
+          <span class="sr-only">{ui.terminal.inputLabel}</span>
+        </label>
+        <input
+          id="term-input"
+          type="text"
+          class="min-w-0 flex-1 bg-transparent text-slate-100 caret-teal-300 outline-none"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="send"
+          data-term-input
+        />
+      </form>
+    </div>
+  </div>
+  <script is:inline type="application/json" data-term-data set:html={JSON.stringify(data).replace(/</g, '\\u003c')} />
+</dialog>
+
+<script>
+  import '../../scripts/terminal';
+</script>
+
+<style>
+  /* Terminal is always dark, in both themes. */
+  dialog.terminal {
+    background: #0a0e14;
+    color: #e2e8f0;
+    border-color: #1f2937;
+  }
+  @media (min-width: 768px) {
+    dialog.terminal {
+      width: min(48rem, calc(100vw - 3rem));
+      height: min(32rem, 80dvh);
+    }
+  }
+  .term-body :global(.t-cmd) { color: #f1f5f9; }
+  .term-body :global(.t-dim) { color: #94a3b8; }
+  .term-body :global(.t-acc) { color: #5eead4; }
+  .term-body :global(.t-vio) { color: #c4b5fd; }
+  .term-body :global(.t-ok) { color: #86efac; }
+  .term-body :global(.t-err) { color: #fca5a5; }
+  .term-body :global(.t-warn) { color: #fcd34d; }
+  .term-body :global(a) { color: #67e8f9; text-decoration: underline; text-underline-offset: 3px; }
+  .term-body :global(.t-line) { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .term-body :global([dir='rtl']) { text-align: right; font-family: var(--font-arabic); }
+</style>

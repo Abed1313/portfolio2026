@@ -56,6 +56,20 @@ menu?.querySelectorAll<HTMLAnchorElement>('[data-menu-link]').forEach((a) => {
   a.addEventListener('click', () => closeMenu());
 });
 
+// Palette / terminal buttons inside the drawer: close the drawer first.
+menu?.querySelectorAll<HTMLElement>('[data-menu-action]').forEach((b) => {
+  b.addEventListener('click', () => closeMenu(), { capture: true });
+});
+
+// Language switch keeps the current section: /#projects → /ar/#projects
+document.querySelectorAll<HTMLAnchorElement>('[data-lang-switch]').forEach((a) => {
+  a.addEventListener('click', () => {
+    const current = document.querySelector('[data-nav-link][aria-current="true"]')?.getAttribute('data-nav-link');
+    const hash = current ? `#${current}` : location.hash;
+    if (hash) a.href = a.href.split('#')[0] + hash;
+  });
+});
+
 // Close the drawer if the viewport grows to desktop size.
 window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => {
   if (e.matches) closeMenu();

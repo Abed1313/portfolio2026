@@ -5,9 +5,9 @@
  */
 export const en = {
   meta: {
-    title: 'Abed Al-Rahman Radwan | RPA Developer & Software Engineer',
+    title: 'Abed Al-Rahman Radwan | RPA Support Engineer & Software Engineer',
     description:
-      'Blue Prism RPA Developer with a .NET full-stack background, based in Amman, Jordan. Certified Blue Prism Professional Developer (PDEV01) and Certified Developer (AD01).',
+      'RPA Support Engineer (Blue Prism) with a .NET full-stack background, based in Amman, Jordan. Certified Blue Prism Professional Developer (PDEV01) and Certified Developer (AD01).',
     langName: 'English',
   },
   a11y: {
@@ -146,7 +146,13 @@ export const en = {
     builtWith: 'Built with Astro',
   },
   palette: {
+    title: 'Commands',
+    label: 'Command palette',
     placeholder: 'Type a command or search…',
+    goTo: 'Go to',
+    downloadCv: 'Download CV',
+    copyEmail: 'Copy email address',
+    sendEmail: 'Send an email',
     groupNavigate: 'Navigate',
     groupActions: 'Actions',
     groupLinks: 'Links',
@@ -158,9 +164,33 @@ export const en = {
   },
   terminal: {
     title: 'terminal: zsh',
+    short: 'Terminal',
+    label: 'Interactive terminal',
+    inputLabel: 'Terminal command',
     welcome: "Welcome! Type 'help' to see available commands.",
     notFound: 'command not found',
     help: 'Available commands',
+    tip: "Tip: use ↑ ↓ for history and Tab to autocomplete.",
+    downloading: 'Downloading CV…',
+    themeNow: 'Theme switched to',
+    sudo: "Permission denied. Try 'contact' instead 🙂",
+    official: 'Official certifications',
+    training: 'Training & courses',
+    fullStack: 'Full-stack projects',
+    rpa: 'RPA projects (confidential)',
+    commands: {
+      help: 'Show this list',
+      about: 'Who I am',
+      skills: 'Skills by category',
+      experience: 'Work history',
+      projects: 'Projects',
+      certs: 'Certifications & training',
+      cv: 'Download my CV',
+      contact: 'How to reach me',
+      theme: 'Toggle light / dark theme',
+      clear: 'Clear the screen',
+      exit: 'Close the terminal',
+    },
   },
   notFound: {
     title: 'Error 404: route not found',

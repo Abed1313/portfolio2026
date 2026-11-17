@@ -88,6 +88,8 @@ export interface ExperienceItem {
   /** Leave undefined for a current role. */
   end?: Text;
   current?: boolean;
+  /** Short note shown on the commit, e.g. "Promoted from RPA Developer". */
+  promotion?: Text;
   location?: Text;
   bullets: Text[];
   tags?: string[];

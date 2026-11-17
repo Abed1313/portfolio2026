@@ -10,23 +10,24 @@ export const profile: Profile = {
   name: { en: 'Abed Al-Rahman Radwan', ar: 'عبد الرحمن رضوان' },
   initials: 'AR',
   title: {
-    en: 'Blue Prism RPA Developer | Software & Automation Engineering',
-    ar: 'مطوّر أتمتة Blue Prism RPA | هندسة البرمجيات والأتمتة',
+    en: 'RPA Support Engineer (Blue Prism) | Software & Automation Engineering',
+    ar: 'مهندس دعم RPA (Blue Prism) | هندسة البرمجيات والأتمتة',
   },
+  /** Hero title. The part before "|" gets the gradient accent. */
   headline: {
-    en: 'RPA Developer | Software & Automation Engineer',
-    ar: 'مطوّر RPA | مهندس برمجيات وأتمتة',
+    en: 'Support Engineer | RPA & Automation',
+    ar: 'مهندس دعم | RPA والأتمتة',
   },
   valueStatement: {
     en: 'I build, enhance, and troubleshoot Blue Prism automations, backed by a .NET full-stack development background.',
-    ar: 'أطوّر أتمتة Blue Prism وأحسّنها وأعالج أعطالها، مستندًا إلى خلفية في تطوير الويب المتكامل بتقنية ‎.NET.',
+    ar: 'أطوّر أتمتة Blue Prism وأحسّنها وأعالج أعطالها، مستندًا إلى خلفية ⁦.NET⁩ في تطوير الويب المتكامل.',
   },
   location: { en: 'Amman, Jordan', ar: 'عمّان، الأردن' },
   email: 'abedalrahmanradwanaar@gmail.com',
   phone: '+962796026511',
   summary: {
     en: 'Blue Prism RPA developer and support engineer experienced in enhancing and troubleshooting business-process automations, testing workflow changes, and diagnosing exceptions across enterprise applications. I bring a .NET full-stack development background and hands-on experience with Excel/Outlook automation, input validation, root-cause analysis, and technical communication with business stakeholders.',
-    ar: 'مطوّر ومهندس دعم في Blue Prism RPA، لديّ خبرة في تحسين أتمتة العمليات التجارية ومعالجة أعطالها، واختبار التعديلات على مسارات العمل، وتشخيص الاستثناءات عبر تطبيقات المؤسسات. أمتلك خلفية في التطوير المتكامل بتقنية ‎.NET، وخبرة عملية في أتمتة Excel وOutlook، والتحقق من صحة المدخلات، وتحليل الأسباب الجذرية، والتواصل التقني مع أصحاب العلاقة في الأعمال.',
+    ar: 'مطوّر ومهندس دعم في Blue Prism RPA، لديّ خبرة في تحسين أتمتة العمليات التجارية ومعالجة أعطالها، واختبار التعديلات على مسارات العمل، وتشخيص الاستثناءات عبر تطبيقات المؤسسات. أمتلك خلفية في التطوير المتكامل بتقنية ⁦.NET⁩، وخبرة عملية في أتمتة Excel وOutlook، والتحقق من صحة المدخلات، وتحليل الأسباب الجذرية، والتواصل التقني مع أصحاب العلاقة في الأعمال.',
   },
   languages: [
     { name: { en: 'Arabic', ar: 'العربية' }, level: { en: 'Native', ar: 'اللغة الأم' } },
@@ -34,8 +35,8 @@ export const profile: Profile = {
     { name: { en: 'Turkish', ar: 'التركية' }, level: { en: 'Professional', ar: 'مستوى مهني' } },
   ],
   currentRole: {
-    en: 'RPA Developer @ Cyborg Automation Hub',
-    ar: 'مطوّر RPA في Cyborg Automation Hub',
+    en: 'RPA Support Engineer @ Cyborg Automation Hub',
+    ar: 'مهندس دعم RPA في Cyborg Automation Hub',
   },
   heroStack: ['Blue Prism', 'C#', '.NET', 'React', 'SQL Server'],
   currentlyWorkingOn: [

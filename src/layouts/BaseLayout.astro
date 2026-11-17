@@ -1,34 +1,81 @@
 ---
 /**
- * Base HTML shell: <head>, theme bootstrap, fonts, background, global scripts.
- * Full SEO (Open Graph, JSON-LD, hreflang) is completed in Phase 4.
+ * Base HTML shell: <head> (SEO, Open Graph, JSON-LD, hreflang), theme bootstrap,
+ * fonts, background, toasts, analytics, global scripts.
  */
 import '../styles/global.css';
+import { getImage } from 'astro:assets';
 // Relative paths: the font packages' "exports" map only exposes .css files.
 // Vite emits these once (same file as the @font-face in global.css), so preload + CSS share one URL.
 import interLatin from '../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 import monoLatin from '../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
+import ogDefault from '../assets/og-default.png';
 import type { Locale } from '../data/types';
-import { localeMeta } from '../data/i18n';
+import { localeMeta, locales } from '../data/i18n';
 import { siteConfig } from '../data/site.config';
-import { useUi } from '../lib/i18n';
-import { hasPublicFile } from '../lib/images';
+import { profile } from '../data/profile';
+import { experience } from '../data/experience';
+import { education } from '../data/education';
+import { certifications } from '../data/certifications';
+import { skillCategories } from '../data/skills';
+import { homePath, tr, useUi } from '../lib/i18n';
+import { getOgImage, getProfilePhoto, hasPublicFile } from '../lib/images';
+import { isSet } from '../lib/links';
 
 interface Props {
   locale: Locale;
   title?: string;
   description?: string;
+  /** 404 and other utility pages: no indexing, no hreflang, no JSON-LD. */
+  noindex?: boolean;
 }
 
-const { locale, title, description } = Astro.props;
+const { locale, title, description, noindex = false } = Astro.props;
 const ui = useUi(locale);
 const meta = localeMeta[locale];
 const pageTitle = title ?? ui.meta.title;
 const pageDescription = description ?? ui.meta.description;
+const site = Astro.site ?? new URL(siteConfig.url);
+const canonical = new URL(Astro.url.pathname, site).href;
+
+/* Open Graph image: your og-image.* if present, otherwise the generated default. */
+const og = await getImage({ src: getOgImage() ?? ogDefault, width: 1200, height: 630, format: 'png' });
+const ogUrl = new URL(og.src, site).href;
 
 if (!hasPublicFile(siteConfig.cv.path)) {
   console.warn(`[portfolio] CV not found at public${siteConfig.cv.path}. Download CV buttons will 404 until you add it.`);
 }
+
+/* JSON-LD Person schema (only facts from src/data). */
+const current = experience.find((e) => e.current);
+const photo = getProfilePhoto();
+const photoUrl = photo ? new URL((await getImage({ src: photo, width: 800, format: 'jpg' })).src, site).href : undefined;
+const sameAs = [siteConfig.social.linkedin, siteConfig.social.github].filter(isSet);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: tr(profile.name, 'en'),
+  alternateName: tr(profile.name, 'ar'),
+  url: new URL('/', site).href,
+  image: photoUrl ?? ogUrl,
+  jobTitle: current ? tr(current.role, 'en') : tr(profile.headline, 'en'),
+  ...(current && { worksFor: { '@type': 'Organization', name: tr(current.company, 'en') } }),
+  email: `mailto:${profile.email}`,
+  address: { '@type': 'PostalAddress', addressLocality: 'Amman', addressCountry: 'JO' },
+  description: tr(profile.summary, 'en'),
+  knowsLanguage: ['ar', 'en', 'tr'],
+  knowsAbout: skillCategories.flatMap((c) => c.skills.map((s) => tr(s.name, 'en'))),
+  alumniOf: [...new Set(education.map((e) => tr(e.institution, 'en')))].map((name) => ({ '@type': 'EducationalOrganization', name })),
+  hasCredential: certifications
+    .filter((c) => c.type === 'certification')
+    .map((c) => ({
+      '@type': 'EducationalOccupationalCredential',
+      name: tr(c.title, 'en'),
+      credentialCategory: 'certification',
+      recognizedBy: { '@type': 'Organization', name: tr(c.issuer, 'en') },
+    })),
+  ...(sameAs.length && { sameAs }),
+};
 ---
 <!doctype html>
 <html lang={meta.htmlLang} dir={meta.dir} data-theme="dark">
@@ -37,8 +84,34 @@ if (!hasPublicFile(siteConfig.cv.path)) {
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
+    <meta name="author" content={tr(profile.name, 'en')} />
     <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#0b0f17" />
+    {noindex ? <meta name="robots" content="noindex, follow" /> : <link rel="canonical" href={canonical} />}
+
+    {!noindex && locales.map((l) => (
+      <link rel="alternate" hreflang={localeMeta[l].htmlLang} href={new URL(homePath(l), site).href} />
+    ))}
+    {!noindex && <link rel="alternate" hreflang="x-default" href={new URL('/', site).href} />}
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content={tr(profile.name, locale)} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${tr(profile.name, locale)}: ${tr(profile.headline, locale)}`} />
+    <meta property="og:locale" content={meta.ogLocale} />
+    {locales.filter((l) => l !== locale).map((l) => <meta property="og:locale:alternate" content={localeMeta[l].ogLocale} />)}
+    <meta property="profile:first_name" content="Abed Al-Rahman" />
+    <meta property="profile:last_name" content="Radwan" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={ogUrl} />
 
     <!-- Theme bootstrap: runs before paint to avoid a flash. Saved choice → system preference → dark. -->
     <script is:inline>
@@ -59,6 +132,20 @@ if (!hasPublicFile(siteConfig.cv.path)) {
     <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={monoLatin} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    {!noindex && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />}
+
+    {siteConfig.analytics.cloudflareToken && (
+      <script
+        is:inline
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: siteConfig.analytics.cloudflareToken })}
+      ></script>
+    )}
     <slot name="head" />
   </head>
   <body>
@@ -70,10 +157,13 @@ if (!hasPublicFile(siteConfig.cv.path)) {
     </a>
     <div class="bg-dots" aria-hidden="true"></div>
     <slot />
+    <div id="toast-root" aria-live="polite"></div>
 
     <script>
       import '../scripts/reveal';
       import '../scripts/spotlight';
+      import '../scripts/toast';
+      import '../scripts/dialogs';
     </script>
   </body>
 </html>

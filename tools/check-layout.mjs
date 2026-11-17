@@ -38,10 +38,13 @@ for (const theme of themes) {
     });
     const page = await ctx.newPage();
     const errors = [];
-    page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+    // --allow-404: checking the 404 page itself, whose document status is 404 by design
+    const allow404 = args.includes('--allow-404');
+    const isDoc404 = (url, status) => allow404 && status === 404 && new URL(url).pathname === path;
+    page.on('console', (m) => m.type() === 'error' && !(allow404 && /status of 404/.test(m.text())) && errors.push(m.text()));
     page.on('pageerror', (e) => errors.push(String(e)));
     page.on('requestfailed', (r) => errors.push(`request failed: ${r.url()}`));
-    page.on('response', (r) => r.status() >= 400 && errors.push(`${r.status()} ${r.url()}`));
+    page.on('response', (r) => r.status() >= 400 && !isDoc404(r.url(), r.status()) && errors.push(`${r.status()} ${r.url()}`));
 
     await page.goto(base + path, { waitUntil: 'networkidle' });
     if ((await page.evaluate(() => document.styleSheets.length)) === 0) errors.push('page has NO stylesheet (unstyled build)');
@@ -77,7 +80,7 @@ for (const theme of themes) {
       const small = [];
       for (const el of document.querySelectorAll('a[href], button, [role="tab"], input, select, textarea, summary')) {
         const s = getComputedStyle(el);
-        if (s.display === 'none' || s.visibility === 'hidden' || el.closest('[inert], dialog:not([open]), .sr-only')) continue;
+        if (s.display === 'none' || s.visibility === 'hidden' || el.closest('[inert], dialog:not([open]), .sr-only') || el.tabIndex === -1) continue;
         const r = el.getBoundingClientRect();
         if (!r.width || !r.height) continue;
         if (el.closest('p, li > span, dd') && el.tagName === 'A' && !el.className) continue; // inline text links

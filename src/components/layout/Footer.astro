@@ -8,8 +8,10 @@ import { tr, useUi } from '../../lib/i18n';
 
 interface Props {
   locale: Locale;
+  /** Terminal + palette buttons (only on pages that include those overlays). */
+  showTools?: boolean;
 }
-const { locale } = Astro.props;
+const { locale, showTools = true } = Astro.props;
 const ui = useUi(locale);
 ---
 <footer class="mt-8 border-t border-line bg-bg-soft">
@@ -33,6 +35,18 @@ const ui = useUi(locale);
       </span>
     </div>
     <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+      {showTools && (
+        <>
+          <button type="button" class="status-btn" data-terminal-open aria-haspopup="dialog" aria-label={ui.a11y.openTerminal}>
+            <Icon name="lucide:square-terminal" class="size-3.5" aria-hidden="true" />
+            <bdi dir="ltr">&gt;_ terminal</bdi>
+          </button>
+          <button type="button" class="status-btn" data-palette-open aria-haspopup="dialog" aria-label={ui.a11y.openCommandPalette}>
+            <Icon name="lucide:command" class="size-3.5" aria-hidden="true" />
+            <bdi dir="ltr" data-kbd-hint>Ctrl K</bdi>
+          </button>
+        </>
+      )}
       <span class="inline-flex items-center gap-1.5">
         <Icon name="simple-icons:astro" class="size-3.5" aria-hidden="true" />
         {ui.footer.builtWith}
@@ -41,3 +55,21 @@ const ui = useUi(locale);
     </div>
   </div>
 </footer>
+
+<style>
+  .status-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    padding-inline: 0.5rem;
+    margin-inline: -0.5rem;
+    border-radius: 0.4rem;
+    color: var(--muted);
+    transition: color 0.2s, background-color 0.2s;
+  }
+  .status-btn:hover {
+    color: var(--accent);
+    background: var(--surface-2);
+  }
+</style>

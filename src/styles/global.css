@@ -553,6 +553,47 @@ html:has(dialog[open]) {
 }
 
 /* ==================================================================== */
+/* 4c. TOASTS                                                            */
+/* ==================================================================== */
+
+#toast-root {
+  position: fixed;
+  z-index: 200;
+  inset-inline: 0;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding-inline: 1rem;
+  pointer-events: none;
+}
+.toast {
+  max-width: 28rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.92rem;
+  box-shadow: 0 12px 30px -10px rgb(0 0 0 / 0.45);
+  opacity: 0;
+  translate: 0 8px;
+  transition: opacity 0.25s ease, translate 0.25s ease;
+}
+.toast.is-in {
+  opacity: 1;
+  translate: 0 0;
+}
+.toast-success { border-color: color-mix(in oklab, var(--success) 55%, transparent); }
+.toast-error { border-color: color-mix(in oklab, var(--danger) 60%, transparent); }
+.toast::before {
+  font-family: var(--font-mono);
+  margin-inline-end: 0.5rem;
+}
+.toast-success::before { content: "✓"; color: var(--success); }
+.toast-error::before { content: "✗"; color: var(--danger); }
+
+/* ==================================================================== */
 /* 5. MOTION                                                             */
 /* ==================================================================== */
 

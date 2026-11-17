@@ -6,9 +6,9 @@ import type { UiStrings } from './en';
  */
 export const ar: UiStrings = {
   meta: {
-    title: 'عبد الرحمن رضوان | مطوّر RPA ومهندس برمجيات',
+    title: 'عبد الرحمن رضوان | مهندس دعم RPA ومهندس برمجيات',
     description:
-      'مطوّر أتمتة Blue Prism RPA بخلفية في تطوير الويب المتكامل بتقنية ‎.NET، مقيم في عمّان، الأردن. حاصل على شهادتَي Blue Prism Professional Developer (PDEV01) وCertified Developer (AD01).',
+      'مهندس دعم RPA (Blue Prism) بخلفية في تطوير الويب المتكامل بتقنية ⁦.NET⁩، مقيم في عمّان، الأردن. حاصل على شهادتَي Blue Prism Professional Developer (PDEV01) وCertified Developer (AD01).',
     langName: 'العربية',
   },
   a11y: {
@@ -146,7 +146,13 @@ export const ar: UiStrings = {
     builtWith: 'بُني باستخدام Astro',
   },
   palette: {
+    title: 'الأوامر',
+    label: 'لوحة الأوامر',
     placeholder: 'اكتب أمرًا أو ابحث…',
+    goTo: 'انتقل إلى',
+    downloadCv: 'تحميل السيرة الذاتية',
+    copyEmail: 'نسخ البريد الإلكتروني',
+    sendEmail: 'إرسال بريد إلكتروني',
     groupNavigate: 'التنقل',
     groupActions: 'إجراءات',
     groupLinks: 'روابط',
@@ -158,9 +164,33 @@ export const ar: UiStrings = {
   },
   terminal: {
     title: 'terminal: zsh',
+    short: 'الطرفية',
+    label: 'طرفية تفاعلية',
+    inputLabel: 'أمر الطرفية',
     welcome: "مرحبًا! اكتب 'help' لعرض الأوامر المتاحة.",
     notFound: 'الأمر غير موجود',
     help: 'الأوامر المتاحة',
+    tip: 'تلميح: استخدم ↑ ↓ لسجل الأوامر و Tab للإكمال التلقائي.',
+    downloading: 'جارٍ تحميل السيرة الذاتية…',
+    themeNow: 'تم تبديل الوضع إلى',
+    sudo: "الصلاحية مرفوضة. جرّب 'contact' بدلًا من ذلك 🙂",
+    official: 'الشهادات الرسمية',
+    training: 'التدريب والدورات',
+    fullStack: 'مشاريع الويب المتكامل',
+    rpa: 'مشاريع RPA (سرّية)',
+    commands: {
+      help: 'عرض هذه القائمة',
+      about: 'من أنا',
+      skills: 'المهارات حسب الفئة',
+      experience: 'الخبرات العملية',
+      projects: 'المشاريع',
+      certs: 'الشهادات والتدريب',
+      cv: 'تحميل سيرتي الذاتية',
+      contact: 'طرق التواصل معي',
+      theme: 'تبديل الوضع الفاتح / الداكن',
+      clear: 'مسح الشاشة',
+      exit: 'إغلاق الطرفية',
+    },
   },
   notFound: {
     title: 'Error 404: route not found',

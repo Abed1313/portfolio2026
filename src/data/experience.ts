@@ -2,19 +2,17 @@ import type { ExperienceItem } from './types';
 
 /** Work history, newest first. Rendered as a `git log` style timeline. */
 export const experience: ExperienceItem[] = [
+  /* Promoted after 3 months: RPA Developer (May–Aug 2025) → RPA Support Engineer (Aug 2025–present). */
   {
-    id: 'cyborg-automation-hub',
-    role: { en: 'RPA Developer & RPA Support Developer', ar: 'مطوّر RPA ومطوّر دعم RPA' },
+    id: 'cyborg-rpa-support-engineer',
+    role: { en: 'RPA Support Engineer', ar: 'مهندس دعم RPA' },
     company: 'Cyborg Automation Hub',
     logoId: 'cyborg-automation-hub',
-    start: { en: 'May 2025', ar: 'أيار 2025' },
+    start: { en: 'Aug 2025', ar: 'آب 2025' },
     current: true,
+    promotion: { en: 'Promoted from RPA Developer', ar: 'ترقية من مطوّر RPA' },
     tags: ['Blue Prism', 'Excel VBO', 'Outlook VBO', 'Work Queues', 'RCA'],
     bullets: [
-      {
-        en: 'Develop and enhance Blue Prism workflows for existing business processes, using Excel and Outlook VBOs, Work Queues, and business-application UI interactions.',
-        ar: 'تطوير مسارات عمل Blue Prism وتحسينها لعمليات تجارية قائمة، باستخدام Excel وOutlook VBOs وWork Queues والتفاعل مع واجهات تطبيقات الأعمال.',
-      },
       {
         en: 'Corrected approval-status validation logic to accept an additional legitimate status value, then tested the updated workflow and its business-exception behavior.',
         ar: 'تصحيح منطق التحقق من حالة الموافقة ليقبل قيمة حالة مشروعة إضافية، ثم اختبار مسار العمل المحدَّث وسلوك استثناءات الأعمال.',
@@ -34,8 +32,23 @@ export const experience: ExperienceItem[] = [
     ],
   },
   {
+    id: 'cyborg-rpa-developer',
+    role: { en: 'RPA Developer', ar: 'مطوّر RPA' },
+    company: 'Cyborg Automation Hub',
+    logoId: 'cyborg-automation-hub',
+    start: { en: 'May 2025', ar: 'أيار 2025' },
+    end: { en: 'Aug 2025', ar: 'آب 2025' },
+    tags: ['Blue Prism', 'Excel VBO', 'Outlook VBO', 'Work Queues'],
+    bullets: [
+      {
+        en: 'Developed and enhanced Blue Prism workflows for existing business processes, using Excel and Outlook VBOs, Work Queues, and business-application UI interactions.',
+        ar: 'تطوير مسارات عمل Blue Prism وتحسينها لعمليات تجارية قائمة، باستخدام Excel وOutlook VBOs وWork Queues والتفاعل مع واجهات تطبيقات الأعمال.',
+      },
+    ],
+  },
+  {
     id: 'luminus-internship',
-    role: { en: '.NET Full-Stack Developer Intern', ar: 'متدرّب مطوّر ويب متكامل ‎.NET' },
+    role: { en: '.NET Full-Stack Developer Intern', ar: 'متدرّب مطوّر ويب متكامل ⁦.NET⁩' },
     company: 'Al Ghurair School / Luminus Life+',
     logoId: 'luminus',
     start: { en: 'Mar 2024', ar: 'آذار 2024' },

@@ -1,0 +1,231 @@
+---
+/**
+ * Contact: direct channels (email + copy, phone call/WhatsApp, socials, CV)
+ * and a terminal-styled form. Provider from siteConfig.contact:
+ *   web3forms → posts from the browser to api.web3forms.com
+ *   resend    → posts to the Pages Function /api/contact
+ */
+import { Icon } from 'astro-icon/components';
+import type { Locale } from '../../data/types';
+import { profile } from '../../data/profile';
+import { siteConfig } from '../../data/site.config';
+import { useUi } from '../../lib/i18n';
+import { formatPhone, isSet, telHref, whatsappHref } from '../../lib/links';
+import { LIMITS } from '../../lib/contact-validation';
+import SectionHeader from '../ui/SectionHeader.astro';
+import SocialLinks from '../ui/SocialLinks.astro';
+import CvButton from '../ui/CvButton.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const ui = useUi(locale);
+const c = ui.contact;
+const { provider, web3formsAccessKey, functionEndpoint } = siteConfig.contact;
+const phone = isSet(profile.phone) ? profile.phone : undefined;
+---
+<section id="contact" class="section" aria-labelledby="contact-title">
+  <div class="container-page">
+    <SectionHeader id="contact" locale={locale} intro={c.intro} />
+
+    <div class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-8">
+      <!-- direct channels -->
+      <div class="reveal grid content-start gap-4" style="--i:0">
+        <div class="card p-5 sm:p-6">
+          <p class="font-mono text-xs text-subtle">{c.orEmail}</p>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <a href={`mailto:${profile.email}`} class="inline-flex min-h-11 min-w-0 items-center break-all text-lg font-semibold text-fg hover:text-accent" dir="ltr">
+              {profile.email}
+            </a>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button type="button" class="btn btn-secondary" data-copy={profile.email} data-copy-ok={ui.actions.emailCopied} data-copy-fail={ui.actions.copyFailed}>
+              <Icon name="lucide:copy" class="size-4" aria-hidden="true" />
+              {ui.actions.copyEmail}
+            </button>
+            <a href={`mailto:${profile.email}`} class="btn btn-ghost">
+              <Icon name="lucide:mail" class="size-4" aria-hidden="true" />
+              Email
+            </a>
+          </div>
+        </div>
+
+        {phone && (
+          <div class="card p-5 sm:p-6">
+            <p class="font-mono text-xs text-subtle">{c.phone}</p>
+            <a href={telHref(phone)} class="mt-2 inline-flex min-h-11 items-center text-lg font-semibold text-fg hover:text-accent" dir="ltr">
+              {formatPhone(phone)}
+            </a>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <a href={telHref(phone)} class="btn btn-secondary">
+                <Icon name="lucide:phone" class="size-4" aria-hidden="true" />
+                {c.call}
+              </a>
+              <a
+                href={whatsappHref(phone)}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-secondary"
+                aria-label={`${c.whatsapp} ${ui.a11y.opensInNewTab}`}
+              >
+                <Icon name="simple-icons:whatsapp" class="size-4" aria-hidden="true" />
+                {c.whatsapp}
+              </a>
+            </div>
+          </div>
+        )}
+
+        <div class="card flex flex-wrap items-center justify-between gap-3 p-5 sm:p-6">
+          <div>
+            <p class="font-mono text-xs text-subtle">{c.findMe}</p>
+            <SocialLinks locale={locale} class="mt-1 -ms-2" />
+          </div>
+          <CvButton locale={locale} />
+        </div>
+      </div>
+
+      <!-- terminal form -->
+      <div class="reveal card overflow-hidden" style="--i:1" dir="ltr">
+        <div class="flex items-center gap-3 border-b border-line bg-surface-2/60 px-4 py-2.5">
+          <div class="flex gap-1.5" aria-hidden="true">
+            <span class="size-3 rounded-full bg-[#ff5f57]"></span>
+            <span class="size-3 rounded-full bg-[#febc2e]"></span>
+            <span class="size-3 rounded-full bg-[#28c840]"></span>
+          </div>
+          <span class="font-mono text-xs text-subtle">contact.sh: bash</span>
+        </div>
+
+        <form
+          class="contact-form grid gap-5 p-5 font-mono sm:p-7"
+          novalidate
+          data-contact-form
+          data-provider={provider}
+          data-endpoint={functionEndpoint}
+          data-access-key={web3formsAccessKey}
+          data-msg-sending={c.sending}
+          data-msg-success={c.success}
+          data-msg-error={c.error}
+          data-msg-not-configured={c.notConfigured}
+          dir={locale === 'ar' ? 'rtl' : 'ltr'}
+        >
+          <p class="text-sm text-muted" dir="ltr">
+            <span class="text-success">abed@portfolio</span>:<span class="text-syn-prop">~</span>$ ./contact.sh
+          </p>
+
+          <!-- honeypot: hidden from people, irresistible to bots -->
+          <div class="hp" aria-hidden="true">
+            <label for={`website-${locale}`}>Website</label>
+            <input id={`website-${locale}`} name="website" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
+          {(['name', 'email', 'message'] as const).map((field) => (
+            <div class="field">
+              <label for={`cf-${field}`} class="text-sm text-accent">
+                <span class="text-subtle" aria-hidden="true">&gt; </span>{c[field]}:
+              </label>
+              {field === 'message' ? (
+                <textarea
+                  id={`cf-${field}`}
+                  name={field}
+                  rows="5"
+                  required
+                  minlength={LIMITS.message.min}
+                  maxlength={LIMITS.message.max}
+                  placeholder={c.messagePlaceholder}
+                  aria-describedby={`cf-${field}-err`}
+                ></textarea>
+              ) : (
+                <input
+                  id={`cf-${field}`}
+                  name={field}
+                  type={field === 'email' ? 'email' : 'text'}
+                  required
+                  autocomplete={field === 'email' ? 'email' : 'name'}
+                  {...(field === 'name' ? { minlength: LIMITS.name.min, maxlength: LIMITS.name.max } : { maxlength: LIMITS.email.max })}
+                  placeholder={field === 'email' ? c.emailPlaceholder : c.namePlaceholder}
+                  aria-describedby={`cf-${field}-err`}
+                  dir={field === 'email' ? 'ltr' : undefined}
+                />
+              )}
+              <p id={`cf-${field}-err`} class="field-error" data-error-for={field} hidden>
+                ✗ {c.errors[field]}
+              </p>
+            </div>
+          ))}
+
+          <div class="flex flex-wrap items-center gap-4">
+            <button type="submit" class="btn btn-primary font-mono" data-submit>
+              <Icon name="lucide:terminal" class="size-4" aria-hidden="true" />
+              <span data-submit-label>{c.send}</span>
+            </button>
+            <p class="min-h-6 text-sm" role="status" aria-live="polite" data-form-status></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../../scripts/contact';
+  import '../../scripts/toast';
+</script>
+
+<style>
+  .field {
+    display: grid;
+    gap: 0.4rem;
+  }
+  .field input,
+  .field textarea {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 0.6rem;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 1rem; /* ≥16px prevents iOS zoom on focus */
+    caret-color: var(--accent);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  :global(:lang(ar)) .field input:not([dir='ltr']),
+  :global(:lang(ar)) .field textarea {
+    font-family: var(--font-arabic);
+  }
+  .field textarea {
+    resize: vertical;
+    min-height: 8rem;
+  }
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: var(--subtle);
+    opacity: 0.8;
+  }
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent);
+  }
+  .field [aria-invalid='true'] {
+    border-color: var(--danger);
+  }
+  .field-error {
+    font-size: 0.85rem;
+    color: var(--danger);
+  }
+  .hp {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  [data-form-status][data-tone='success'] { color: var(--success); }
+  [data-form-status][data-tone='error'] { color: var(--danger); }
+  [data-form-status][data-tone='info'] { color: var(--muted); }
+</style>
