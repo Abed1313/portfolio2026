@@ -15,7 +15,6 @@ export const education: EducationItem[] = [
     institution: { en: 'TÖMER, Karabük University', ar: 'TÖMER، جامعة كارابوك' },
     location: { en: 'Türkiye', ar: 'تركيا' },
     logoId: 'karabuk-university',
-    /** TODO: add the year. "[YEAR]" is hidden on the site until replaced. */
-    year: '[YEAR]',
+    year: { en: 'Sep 2019 – 2020', ar: 'أيلول 2019 – 2020' },
   },
 ];

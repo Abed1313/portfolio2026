@@ -42,10 +42,11 @@ slot shows a designed fallback (initials, gradient/code placeholder, monogram, o
 | ☐ | Certificate: .NET Full-Stack | `src/assets/images/certificates/dotnet-full-stack.webp` | ~1600 px wide | Optional |
 | ☐ | Certificate: BTEC | `src/assets/images/certificates/btec.webp` | ~1600 px wide | Optional |
 | ☐ | Certificate: Applied AI (Executive) | `src/assets/images/certificates/applied-ai-executive.webp` | ~1600 px wide | Optional |
+| ☐ | Certificate: Appian Application Development | `src/assets/images/certificates/appian-app-development.webp` | ~1600 px wide | Optional |
 | ☐ | Certificate: PMP® Preparation Course | `src/assets/images/certificates/pmp-prep-35-pdus.webp` | ~1600 px wide | Optional |
 | ☐ | Certificate: Scrum, Agile & Kanban | `src/assets/images/certificates/scrum-agile-kanban.webp` | ~1600 px wide | Optional |
 | ☐ | Certificate: GenAI in Project Management | `src/assets/images/certificates/genai-project-management.webp` | ~1600 px wide | Optional |
-| ☐ | Certificate PDFs (any of the 9 ids above) | `public/certificates/<certificate-id>.pdf` (e.g. `public/certificates/blue-prism-pdev01.pdf`) | PDF | Optional ("Open PDF") |
+| ☐ | Certificate PDFs (any of the 10 ids above) | `public/certificates/<certificate-id>.pdf` (e.g. `public/certificates/blue-prism-pdev01.pdf`) | PDF | Optional ("Open PDF") |
 
 `.webp` is shown for brevity; `.jpg`, `.jpeg` or `.png` with the same name work the same.
 

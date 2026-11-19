@@ -32,10 +32,10 @@ const { locale } = Astro.props;
                     {tr(e.location, locale)}
                   </span>
                 )}
-                {isFilled(e.year) && (
+                {isFilled(tr(e.year, locale)) && (
                   <span class="inline-flex items-center gap-1.5 font-mono">
                     <Icon name="lucide:calendar" class="size-4" aria-hidden="true" />
-                    {e.year}
+                    {tr(e.year, locale)}
                   </span>
                 )}
               </p>

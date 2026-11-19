@@ -17,7 +17,7 @@ export const certifications: Certification[] = [
     title: 'Blue Prism® Professional Developer Certification (PDEV01)',
     issuer: 'Blue Prism',
     issuerLogoId: 'blue-prism',
-    date: { en: 'Jan 2025', ar: 'كانون الثاني 2025' },
+    date: { en: 'Jul 2025', ar: 'تموز 2025' },
     category: 'rpa',
     type: 'certification',
     featured: true,
@@ -28,7 +28,7 @@ export const certifications: Certification[] = [
     title: 'Blue Prism Certified Developer (AD01)',
     issuer: 'Blue Prism',
     issuerLogoId: 'blue-prism',
-    date: { en: 'Jan 2025', ar: 'كانون الثاني 2025' },
+    date: { en: 'Jul 2025', ar: 'تموز 2025' },
     category: 'rpa',
     type: 'certification',
     featured: true,
@@ -68,16 +68,24 @@ export const certifications: Certification[] = [
     title: 'Executive Certificate in Applied Artificial Intelligence',
     issuer: 'Cyborg Academy',
     issuerLogoId: 'cyborg-academy',
-    date: '2026',
+    date: { en: 'Jun 2026', ar: 'حزيران 2026' },
     category: 'ai',
+    type: 'training',
+  },
+  {
+    id: 'appian-app-development',
+    title: 'Appian Application Development Training',
+    issuer: 'Cyborg Academy',
+    issuerLogoId: 'cyborg-academy',
+    date: { en: 'Jul 2026', ar: 'تموز 2026' },
+    category: 'rpa',
     type: 'training',
   },
   {
     id: 'pmp-prep-35-pdus',
     title: 'PMP® Preparation Course (35 PDUs)',
-    /** TODO: issuer */
-    issuer: '[ISSUER]',
-    date: { en: 'Jan 2026', ar: 'كانون الثاني 2026' },
+    issuer: 'Gaza Phoenix (PMI® Authorized Training Partner)',
+    date: { en: 'Mar 2026', ar: 'آذار 2026' },
     category: 'project-management',
     type: 'training',
     note: {
@@ -97,11 +105,11 @@ export const certifications: Certification[] = [
   {
     id: 'genai-project-management',
     title: 'Generative AI in Project Management: PMBOK® 8-Aligned',
-    /** TODO: issuer */
-    issuer: '[ISSUER]',
+    issuer: 'Udemy',
     date: { en: 'Jan 2026', ar: 'كانون الثاني 2026' },
     category: 'project-management',
     type: 'training',
+    credentialUrl: 'https://ude.my/UC-6acbf75f-a293-4e0e-aaf6-a5cbbd112283',
   },
 ];
 

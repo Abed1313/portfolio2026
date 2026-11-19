@@ -21,10 +21,8 @@ export const siteConfig = {
   },
 
   social: {
-    /** TODO: your LinkedIn profile URL */
-    linkedin: '[LINKEDIN_URL]',
-    /** TODO: your GitHub profile URL */
-    github: '[GITHUB_URL]',
+    linkedin: 'https://www.linkedin.com/in/abed-al-rahman-radwan/',
+    github: 'https://github.com/Abed1313',
   },
 
   analytics: {
@@ -46,8 +44,8 @@ export const siteConfig = {
      * See README.md → "Contact form".
      */
     provider: 'web3forms' as ContactProvider,
-    /** TODO: Web3Forms access key (https://web3forms.com). Only used when provider = "web3forms". */
-    web3formsAccessKey: '',
+    /** Web3Forms access key (public, safe in client code). Only used when provider = "web3forms". */
+    web3formsAccessKey: 'c3988de1-ee3f-494b-8f4b-a18e6ef27841',
     /** Endpoint of the Pages Function. Only used when provider = "resend". */
     functionEndpoint: '/api/contact',
   },

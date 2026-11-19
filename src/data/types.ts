@@ -161,7 +161,7 @@ export interface EducationItem {
   location?: Text;
   logoId?: string;
   /** "[YEAR]" placeholder is hidden automatically. */
-  year: string;
+  year: Text;
   note?: Text;
 }
 
