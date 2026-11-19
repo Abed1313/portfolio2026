@@ -8,8 +8,8 @@
 export type ContactProvider = 'web3forms' | 'resend';
 
 export const siteConfig = {
-  /** TODO: replace with your real domain (used for canonical URLs, sitemap, Open Graph). */
-  url: 'https://example.pages.dev',
+  /** Live domain (used for canonical URLs, sitemap, Open Graph). */
+  url: 'https://abed-al-rahman-radwan.pages.dev',
 
   /** Shows the "Open to opportunities" badge in the hero + footer status bar. */
   availableForWork: true,
