@@ -12,7 +12,7 @@ export const siteConfig = {
   url: 'https://abed-al-rahman-radwan.pages.dev',
 
   /** Shows the "Open to opportunities" badge in the hero + footer status bar. */
-  availableForWork: true,
+  availableForWork: false,
 
   /** CV file in /public. The Download CV buttons use the `download` attribute. */
   cv: {

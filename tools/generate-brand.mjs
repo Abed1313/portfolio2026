@@ -95,8 +95,6 @@ const ogSvg = `<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" widt
   <text x="80" y="368" font-family="'Segoe UI', Inter, Arial, sans-serif" font-size="40" font-weight="600"><tspan fill="url(#txt)">${lead}</tspan>${rest ? `<tspan fill="#64748b"> | </tspan><tspan fill="#e6edf7">${rest}</tspan>` : ''}</text>
   ${chipSvg}
   <rect x="0" y="606" width="1200" height="24" fill="#0e1420"/>
-  <circle cx="92" cy="618" r="5" fill="#34d399"/>
-  <text x="106" y="624" font-family="Consolas, monospace" font-size="15" fill="#34d399">Open to opportunities</text>
 </svg>`;
 await sharp(Buffer.from(ogSvg)).png({ compressionLevel: 9 }).toFile('src/assets/og-default.png');
 
