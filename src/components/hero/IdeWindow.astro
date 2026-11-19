@@ -61,7 +61,7 @@ const lines: Tok[][] = [
   [ind(), p('],')],
   ...(certCodes.length ? [[ind(), prop('certified'), p(': '), ...list(certCodes), p(',')]] : []),
   [MOBILE_HIDE, ind(), prop('languages'), p(': '), ...list(profile.languages.map((l) => en(l.name))), p(',')],
-  ...(siteConfig.availableForWork ? [[ind(), prop('openToWork'), p(': '), ['syn-num', 'true'], p(',')]] : []),
+  ...(siteConfig.availableForWork ? [[ind(), prop('openToWork'), p(': '), ['syn-num', 'true'] as Tok, p(',')]] : []),
   [p('} '), k('as const'), p(';')],
 ];
 
